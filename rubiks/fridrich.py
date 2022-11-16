@@ -1,16 +1,16 @@
 import gym.spaces
-import gym_Rubiks_Cube
+from rubiks.env.cube import RubiksCubeEnv
 import time
 import random
 
 class FridrichSolver:
     actionDict = {
-            'f':  0,
-            'r':  1,
-            'l':  2,
-            'u':  3,
-            'd':  4,
-            'b':  5,
+            'f':  0, # orange
+            'r':  1, # green
+            'l':  2, # blue
+            'u':  3, # yellow
+            'd':  4, # white
+            'b':  5, # red
             '.f': 6,
             '.r': 7,
             '.l': 8,
@@ -29,8 +29,7 @@ class FridrichSolver:
             self.seed = 0
 
     def scramble(self):
-        self.env.setScramble(5, 10, True)
-        self.env.reset(seed=self.seed)
+        self.env.reset(seed=self.seed, options={'min': 5, 'max': 10})
         self.env.render()
 
         done = False

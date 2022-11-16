@@ -1,17 +1,22 @@
+from typing import Tuple
+
+from gym.core import ActType, ObsType
 from matplotlib import pyplot as plt, colors
 import numpy as np
 import random
 
 import gym
+from rubiks.consts import *
 
 class RubiksCubeEnv(gym.Env):
+
     cmap = {
-        0: 'white',
-        1: 'red',
-        2: 'orange',
-        3: 'yellow',
-        4: 'green',
-        5: 'blue'
+        WHITE: 'white',
+        RED: 'red',
+        ORANGE: 'orange',
+        YELLOW: 'yellow',
+        GREEN: 'green',
+        BLUE: 'blue'
     }
     def __init__(self, render_mode=None):
         self.state = np.empty((3,3,6), dtype=np.uint8)
@@ -22,22 +27,77 @@ class RubiksCubeEnv(gym.Env):
         self.step_count = 0
 
 
-    def reset(self,seed=None, options=None):
+    def reset(self, seed=None, options=None):
+        """
+        Reset and randomize the cube
+
+        :param seed: Seed for random number generator
+        :param options: dictionary:
+            {
+                min: min number of steps to take for the scramble,
+                max: max number of steps to take for the scramble,
+                scramble: whether to scramble the cube
+            }
+        :return: state, {}
+        """
+        if options is None:
+            options = {'min': 5, 'max': 20, 'scramble': True}
+
         random.seed(seed)
 
         for i in range(6):
             self.state[:,:,i] = i
 
-        self.step_count = 0 
+        self.step_count = 0
+        if options.get('scramble', False):
+            self._scramble(random.randint(options.get('min', 5), options.get('max', 20)))
+
+        return self.state, {}
+
+    def _scramble(self, steps):
+        for _ in range(steps):
+            action = random.randint(0, 11)
+            print(action)
+            self.render()
+            self._action(action)
+
+
+    def _action(self, action):
+        if action == 0:
+            self.rotate_clockwise(ORANGE)
+        elif action == 1:
+            self.rotate_clockwise(GREEN)
+        elif action == 2:
+            self.rotate_clockwise(BLUE)
+        elif action == 3:
+            self.rotate_clockwise(YELLOW)
+        elif action == 4:
+            self.rotate_clockwise(WHITE)
+        elif action == 5:
+            self.rotate_clockwise(RED)
+        elif action == 6:
+            self.rotate_cc(ORANGE)
+        elif action == 7:
+            self.rotate_cc(GREEN)
+        elif action == 8:
+            self.rotate_cc(BLUE)
+        elif action == 9:
+            self.rotate_cc(YELLOW)
+        elif action == 10:
+            self.rotate_cc(WHITE)
+        elif action == 11:
+            self.rotate_cc(RED)
+        else:
+            raise ValueError("Action must be on the interval [0,11]")
 
     def render(self, mode='human'):
         image = np.full((9,12), 6)
-        image[3:6,0:3] = self.state[:,:,5]      ## Blue side
-        image[3:6,3:6] = self.state[:,:,0]      ## White side
-        image[3:6,6:9] = self.state[:,:,4]      ## Green Side
-        image[3:6,9:12] = self.state[:,:,3]     ## Yellow side
-        image[0:3,3:6] = self.state[:,:,1]      ## red side
-        image[6:9,3:6] = self.state[:,:,2]      ## orange side
+        image[3:6,0:3] = self.state[:,:,BLUE]        ## Blue side
+        image[3:6,3:6] = self.state[:,:,WHITE]       ## White side
+        image[3:6,6:9] = self.state[:,:,GREEN]       ## Green Side
+        image[3:6,9:12] = self.state[:,:,YELLOW]     ## Yellow side
+        image[0:3,3:6] = self.state[:,:,RED]         ## red side
+        image[6:9,3:6] = self.state[:,:,ORANGE]      ## orange side
 
         colorList = list(self.cmap.values()) + ["black"]
         cmape = colors.ListedColormap(colorList)
@@ -47,49 +107,47 @@ class RubiksCubeEnv(gym.Env):
 
     def rotate_cc(self, side):
         self.state[:,:,side] = np.rot90(self.state[:,:,side])
+        state = np.copy(self.state)
 
-        if side == 0:
-            tmpg = np.copy(self.state[:,0,4])
-            tmpo = np.copy(self.state[0,:,2])
-            tmpb = np.copy(self.state[:,2,5])
-            tmpr = np.copy(self.state[2,:,1])
-            self.state[0,:,2] = tmpb
-            self.state[:,2,5] = np.flip(tmpr)
-            self.state[2,:,1] = tmpg
-            self.state[:,0,4] = np.flip(tmpo)
-        elif side == 1:
-            state = np.copy(self.state)
-            self.state[0,:,0] = state[0,:,5]
-            self.state[0,:,4] = state[0,:,0]
-            self.state[0,:,3] = state[0,:,4]
-            self.state[0,:,5] = state[0,:,3]
-        elif side == 2:
-            state = np.copy(self.state)
-            self.state[2,:,0] = state[2,:,4]
-            self.state[2,:,4] = state[2,:,3]
-            self.state[2,:,3] = state[2,:,5]
-            self.state[2,:,5] = state[2,:,0]
-        elif side == 3:
-            state = np.copy(self.state)
-            self.state[:,2,4] = state[0,:,1]
-            self.state[2,:,2] = np.flip(state[:,2,4])
-            self.state[:,0,5] = state[2,:,2]
-            self.state[0,:,1] = np.flip(state[:,0,5])
-        elif side == 4:
-            state = np.copy(self.state)
-            self.state[:,2,1] = state[0,:,3]
-            self.state[:,2,0] = state[:,2,1]
-            self.state[:,2,2] = state[:,2,0]
-            self.state[:,0,3] = np.flip(state[:,2,2])
-        elif side == 5:
-            state = np.copy(self.state)
-            self.state[:,0,1] = state[:,0,0]
-            self.state[:,0,0] = state[:,0,2]
-            self.state[:,0,2] = np.flip(state[:,2,3])
-            self.state[:,2,3] = state[:,0,1]
+        if side == WHITE:
+            self.state[0,:,ORANGE] = state[:,2,BLUE]
+            self.state[:,2,BLUE] = np.flip(state[2,:,RED])
+            self.state[2,:,RED] = state[:,0,GREEN]
+            self.state[:,0,GREEN] = np.flip(state[0,:,ORANGE])
+        elif side == RED:
+            self.state[0,:,WHITE] = state[0,:,BLUE]
+            self.state[0,:,GREEN] = state[0,:,WHITE]
+            self.state[0,:,YELLOW] = state[0,:,GREEN]
+            self.state[0,:,BLUE] = state[0,:,YELLOW]
+        elif side == ORANGE:
+            self.state[2,:,WHITE] = state[2,:,GREEN]
+            self.state[2,:,GREEN] = state[2,:,YELLOW]
+            self.state[2,:,YELLOW] = state[2,:,BLUE]
+            self.state[2,:,BLUE] = state[2,:,WHITE]
+        elif side == YELLOW:
+            self.state[:,2,GREEN] = state[0,:,RED]
+            self.state[2,:,ORANGE] = np.flip(state[:,2,GREEN])
+            self.state[:,0,BLUE] = state[2,:,ORANGE]
+            self.state[0,:,RED] = np.flip(state[:,0,BLUE])
+        elif side == GREEN:
+            self.state[:,2,RED] = state[0,:,YELLOW]
+            self.state[:,2,WHITE] = state[:,2,RED]
+            self.state[:,2,ORANGE] = state[:,2,WHITE]
+            self.state[:,0,YELLOW] = np.flip(state[:,2,ORANGE])
+        elif side == BLUE:
+            self.state[:,0,RED] = state[:,0,WHITE]
+            self.state[:,0,WHITE] = state[:,0,ORANGE]
+            self.state[:,0,ORANGE] = np.flip(state[:,2,YELLOW])
+            self.state[:,2,YELLOW] = state[:,0,RED]
+
+        self.state = np.array(self.state)
 
 
     def rotate_clockwise(self, side):
         self.rotate_cc(side)
         self.rotate_cc(side)
         self.rotate_cc(side)
+
+
+    def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
+        pass

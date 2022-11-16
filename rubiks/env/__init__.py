@@ -1,6 +1,6 @@
 from gym.envs.registration import register
 
 register(
-    id='RubiksCube-v0',
-    entry_point='rubiks_cube.cube:RubiksCubeEnv',
+    id='RubiksCube-v1',
+    entry_point='rubiks.env.cube:RubiksCubeEnv',
 )
