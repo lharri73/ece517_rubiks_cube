@@ -18,6 +18,23 @@ class RubiksCubeEnv(gym.Env):
         GREEN: 'green',
         BLUE: 'blue'
     }
+    actionList = [
+        'f', 'r', 'l', 'u', 'd', 'b',
+        '.f', '.r', '.l', '.u', '.d', '.b']
+    actionDict = {
+            'f':  0, # orange
+            'r':  1, # green
+            'l':  2, # blue
+            'u':  3, # white
+            'd':  4, # yellow
+            'b':  5, # red
+            '.f': 6,
+            '.r': 7,
+            '.l': 8,
+            '.u': 9,
+            '.d': 10,
+            '.b': 11
+        }
     def __init__(self, render_mode=None):
         self.state = np.empty((3,3,6), dtype=np.uint8)
         for i in range(6):
@@ -57,8 +74,6 @@ class RubiksCubeEnv(gym.Env):
     def _scramble(self, steps):
         for _ in range(steps):
             action = random.randint(0, 11)
-            print(action)
-            self.render()
             self._action(action)
 
 
@@ -70,9 +85,9 @@ class RubiksCubeEnv(gym.Env):
         elif action == 2:
             self.rotate_clockwise(BLUE)
         elif action == 3:
-            self.rotate_clockwise(YELLOW)
-        elif action == 4:
             self.rotate_clockwise(WHITE)
+        elif action == 4:
+            self.rotate_clockwise(YELLOW)
         elif action == 5:
             self.rotate_clockwise(RED)
         elif action == 6:
@@ -82,9 +97,9 @@ class RubiksCubeEnv(gym.Env):
         elif action == 8:
             self.rotate_cc(BLUE)
         elif action == 9:
-            self.rotate_cc(YELLOW)
-        elif action == 10:
             self.rotate_cc(WHITE)
+        elif action == 10:
+            self.rotate_cc(YELLOW)
         elif action == 11:
             self.rotate_cc(RED)
         else:
@@ -130,7 +145,7 @@ class RubiksCubeEnv(gym.Env):
             self.state[:,0,BLUE] = state[2,:,ORANGE]
             self.state[0,:,RED] = np.flip(state[:,0,BLUE])
         elif side == GREEN:
-            self.state[:,2,RED] = state[0,:,YELLOW]
+            self.state[:,2,RED] = np.flip(state[:,0,YELLOW])
             self.state[:,2,WHITE] = state[:,2,RED]
             self.state[:,2,ORANGE] = state[:,2,WHITE]
             self.state[:,0,YELLOW] = np.flip(state[:,2,ORANGE])
@@ -138,7 +153,7 @@ class RubiksCubeEnv(gym.Env):
             self.state[:,0,RED] = state[:,0,WHITE]
             self.state[:,0,WHITE] = state[:,0,ORANGE]
             self.state[:,0,ORANGE] = np.flip(state[:,2,YELLOW])
-            self.state[:,2,YELLOW] = state[:,0,RED]
+            self.state[:,2,YELLOW] = np.flip(state[:,0,RED])
 
         self.state = np.array(self.state)
 
@@ -150,4 +165,8 @@ class RubiksCubeEnv(gym.Env):
 
 
     def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
-        pass
+        self._action(action)
+
+        reward = -1
+
+        done = False

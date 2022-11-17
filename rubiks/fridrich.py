@@ -4,23 +4,6 @@ import time
 import random
 
 class FridrichSolver:
-    actionDict = {
-            'f':  0, # orange
-            'r':  1, # green
-            'l':  2, # blue
-            'u':  3, # yellow
-            'd':  4, # white
-            'b':  5, # red
-            '.f': 6,
-            '.r': 7,
-            '.l': 8,
-            '.u': 9,
-            '.d': 10,
-            '.b': 11
-        }
-    actionList = [
-        'f', 'r', 'l', 'u', 'd', 'b',
-        '.f', '.r', '.l', '.u', '.d', '.b']
     def __init__(self, random=True):
         self.env = gym.make("RubiksCube-v0")
         if random:
