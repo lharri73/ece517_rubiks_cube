@@ -4,16 +4,12 @@ import time
 import random
 
 class FridrichSolver:
-    def __init__(self, random=True):
+    def __init__(self):
         self.env = gym.make("RubiksCube")
-        if random:
-            self.seed = int(time.time())
-        else:
-            self.seed = 0
 
     def solve(self):
         self.env.reset()
-        self.env.render()
+        self.env.render(seed=0)
 
         done = False
         while not done:
