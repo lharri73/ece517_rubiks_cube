@@ -5,7 +5,7 @@ import random
 
 class FridrichSolver:
     def __init__(self, random=True):
-        self.env = gym.make("RubiksCube-v0")
+        self.env = gym.make("RubiksCube")
         if random:
             self.seed = int(time.time())
         else:
