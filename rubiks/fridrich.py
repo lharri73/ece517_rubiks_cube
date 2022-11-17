@@ -11,14 +11,14 @@ class FridrichSolver:
         else:
             self.seed = 0
 
-    def scramble(self):
-        self.env.reset(seed=self.seed, options={'min': 5, 'max': 10})
+    def solve(self):
+        self.env.reset()
         self.env.render()
 
         done = False
         while not done:
             action = random.randint(0, 11)
-            print(f'action: {self.actionList[action]}')
+            print(f'action: {self.env.actionList[action]}')
             self.env.step(action)
             self.env.render()
             input()
@@ -26,4 +26,4 @@ class FridrichSolver:
 
 if __name__ == "__main__":
     solver = FridrichSolver()
-    solver.scramble()
+    solver.solve()

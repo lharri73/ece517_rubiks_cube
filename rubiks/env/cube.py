@@ -169,4 +169,13 @@ class RubiksCubeEnv(gym.Env):
 
         reward = -1
 
-        done = False
+        done = True
+        for i in range(6):
+            if not np.all(self.state[:,:,i] == i):
+                done = False
+                break
+
+        if done:
+            reward = 100
+
+        return self.state, reward, done, False, {}
