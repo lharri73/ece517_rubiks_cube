@@ -117,7 +117,19 @@ class RubiksCubeEnv(gym.Env):
         colorList = list(self.cmap.values()) + ["black"]
         cmape = colors.ListedColormap(colorList)
         plt.imshow(image, cmap=cmape)
-        plt.show(0)
+        plt.text(4,4,'T', fontsize='x-large', horizontalalignment='center', fontweight='bold', verticalalignment='center')
+        plt.text(1, 4, 'L', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+                 verticalalignment='center')
+        plt.text(4, 1, 'B', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+                 verticalalignment='center')
+        plt.text(7, 4, 'R', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+                 verticalalignment='center')
+        plt.text(10, 4, 'D', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+                 verticalalignment='center')
+        plt.text(4, 7, 'F', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+                 verticalalignment='center')
+        plt.axis('off')
+        plt.show()
 
 
     def rotate_cc(self, side):
