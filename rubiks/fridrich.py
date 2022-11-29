@@ -6,6 +6,7 @@ from rubiks.env.cube import RubiksCubeEnv
 import time
 import random
 from rubiks.consts import *
+from rubiks.utils import get_color, get_matching_idx
 
 class FridrichSolver:
     def __init__(self):
@@ -54,79 +55,52 @@ class FridrichSolver:
         return blue_solved and red_solved and green_solved and orange_solved
 
 
-    def get_matching_side(self,side, direction):
+    def find_middle_piece(self, target1=GREEN, target2=WHITE):
+        breaker = False
+        for row, col, dir in [(0,1,UP), (1,2,RIGHT), (2,1,DOWN), (1,0,LEFT)]:
+            for side in [WHITE, RED, ORANGE, YELLOW, GREEN, BLUE]:
+                if self.state[row,col,side] == target1:
+                    (facing_r, facing_c, facing_s, _), _ = get_matching_idx((row,col,side))
+                    if self.state[facing_r,facing_c,facing_s] == target2:
+                        breaker = True
+                        break
+            if breaker: break
+
+        return row,col,side
+
+    def white_cross_s1(self, target=GREEN):
+        row, col, side = self.find_middle_piece(WHITE, target)
         if side == WHITE:
-            if direction == UP:
-                return RED
-            elif direction == LEFT:
-                return BLUE
-            elif direction == RIGHT:
-                return GREEN
-            elif direction == DOWN:
-                return ORANGE
+            if row == 1 and col == 2:
+                ## do nothing, the white green piece is in the right place
+                pass
+            elif row == 0 and col == 1:
+                passdd
         elif side == RED:
-            if direction == UP:
-                return YELLOW
-            elif direction == DOWN:
-                return WHITE
-            elif direction == LEFT:
-                return BLUE
-            elif direction == RIGHT:
-                return GREEN
-        elif side == YELLOW:
-            if direction == UP:
-                return RED
-            elif direction == LEFT:
-                return GREEN
-            elif direction == RIGHT:
-                return BLUE
-            elif direction == DOWN:
-                return ORANGE
-        elif side == GREEN:
-            if direction == UP:
-                return RED
-            elif direction == LEFT:
-                return WHITE
-            elif direction == RIGHT:
-                return YELLOW
-            elif direction == DOWN:
-                return ORANGE
-        elif side == BLUE:
-            if direction == UP:
-                return RED
-            elif direction == LEFT:
-                return YELLOW
-            elif direction == RIGHT:
-                return WHITE
-            elif direction == DOWN:
-                return ORANGE
-        elif side == ORANGE:
-            if direction == UP:
-                return WHITE
-            elif direction == LEFT:
-                return BLUE
-            elif direction == RIGHT:
-                return GREEN
-            elif direction == DOWN:
-                return YELLOW
-        else:
-            raise ValueError("Invalid side!")
-
-
-
-    def solve_white_cross(self, target=GREEN):
-        for row, col in [(0,1), (1,2), (2,1), (1,0)]:
             pass
+        elif side == ORANGE:
+            pass
+        elif side == YELLOW:
+            pass
+        elif side == GREEN:
+            pass
+        elif side == BLUE:
+            pass
+        else:
+            raise ValueError("cannot find piece during white cross solve")
+
+    def solve_white_cross(self):
+        self.white_cross_s1(GREEN)
+
+
 
     def solve(self):
-        self.state, _ = self.env.reset(seed=0, options={'scramble': False})
-        self.scramble()
+        self.state, _ = self.env.reset(seed=1, options={'scramble': True})
+        # self.scramble()
         self.env.render()
 
         print(self.white_cross_solved())
         self.solve_white_cross()
-
-
 
         # done = False
         # while not done:

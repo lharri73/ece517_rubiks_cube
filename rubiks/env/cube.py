@@ -191,3 +191,4 @@ class RubiksCubeEnv(gym.Env):
             reward = 100
 
         return self.state, reward, done, False, {}
+
