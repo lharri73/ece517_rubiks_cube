@@ -8,6 +8,7 @@ import time
 import random
 from rubiks.consts import *
 from rubiks.utils import get_color, get_matching_idx, move
+import numpy as np
 
 class FridrichSolver:
     def __init__(self):
@@ -72,14 +73,25 @@ class FridrichSolver:
 
         return row,col,side
 
+    def rotate_idx_90(self, *idx):
+        mat = np.zeros((3,3))
+        mat[idx] = 1
+        mat = np.rot90(mat)
+        new_idx_flat = np.argmax(mat)
+        new_idx = np.unravel_index(new_idx_flat, (3,3))
+        return new_idx
+
+
     def white_cross_s1(self, target=GREEN):
         row, col, side = self.find_middle_piece(WHITE, target)
+        self.rotate_idx_90(0,0)
         if side == WHITE:
             if row == 1 and col == 2:
                 ## do nothing, the white green piece is in the right place
                 pass
             elif row == 0 and col == 1:
                 self.move(".b.ubu")
+                pass
         elif side == RED:
             pass
         elif side == ORANGE:
