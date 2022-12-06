@@ -105,7 +105,7 @@ class RubiksCubeEnv(gym.Env):
         else:
             raise ValueError("Action must be on the interval [0,11]")
 
-    def render(self, mode='human'):
+    def render(self, mode='human', show=True):
         image = np.full((9,12), 6)
         image[3:6,0:3] = self.state[:,:,BLUE]        ## Blue side
         image[3:6,3:6] = self.state[:,:,WHITE]       ## White side
@@ -117,7 +117,7 @@ class RubiksCubeEnv(gym.Env):
         colorList = list(self.cmap.values()) + ["black"]
         cmape = colors.ListedColormap(colorList)
         plt.imshow(image, cmap=cmape)
-        plt.text(4,4,'T', fontsize='x-large', horizontalalignment='center', fontweight='bold', verticalalignment='center')
+        plt.text(4,4,'U', fontsize='x-large', horizontalalignment='center', fontweight='bold', verticalalignment='center')
         plt.text(1, 4, 'L', fontsize='x-large', horizontalalignment='center', fontweight='bold',
                  verticalalignment='center')
         plt.text(4, 1, 'B', fontsize='x-large', horizontalalignment='center', fontweight='bold',
@@ -129,7 +129,10 @@ class RubiksCubeEnv(gym.Env):
         plt.text(4, 7, 'F', fontsize='x-large', horizontalalignment='center', fontweight='bold',
                  verticalalignment='center')
         plt.axis('off')
-        plt.show()
+        if show == True:
+            plt.show()
+        else:
+            return
 
 
     def rotate_cc(self, side):
@@ -192,3 +195,14 @@ class RubiksCubeEnv(gym.Env):
 
         return self.state, reward, done, False, {}
 
+    def rotate_cube(self):
+        self.state[:,:,WHITE] = np.rot90(self.state[:,:,WHITE], k=3)
+        tmp = np.copy(self.state[:,:,RED])
+        self.state[:,:,RED] = np.rot90(self.state[:,:,BLUE],k=3)
+        self.state[:,:,BLUE] = np.rot90(self.state[:,:,ORANGE],k=3)
+        self.state[:,:,ORANGE] = np.rot90(self.state[:,:,GREEN],k=3)
+        self.state[:,:,GREEN] = np.rot90(tmp, k=3)
+        self.state[:,:,YELLOW] = np.rot90(self.state[:,:,YELLOW],k=1)
+
+
+        self.state = np.array(self.state)

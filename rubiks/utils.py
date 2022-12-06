@@ -131,3 +131,29 @@ def get_matching_idx(pos):
             return [2,0,WHITE,RIGHT], [0,0,ORANGE,DOWN]
     else:
         raise ValueError("Invalid color")
+
+
+def move(actions, func):
+    lst = []
+    add_to_last = False
+    for c in actions:
+        if c == ".":
+            add_to_last = True
+        elif c == '\n':
+            break
+        else:
+            lst.append(c)
+            if add_to_last:
+                lst[-1] = '.' + str(lst[-1])
+            add_to_last = False
+
+
+    rets = []
+    for action in lst:
+        if action.isnumeric():
+            rets.append(func(action))
+        else:
+            action_num = actionDict[action]
+            rets.append(func(action_num))
+
+    return rets

@@ -1,12 +1,13 @@
 import functools
 import operator
 
+import gym
 import gym.spaces
 from rubiks.env.cube import RubiksCubeEnv
 import time
 import random
 from rubiks.consts import *
-from rubiks.utils import get_color, get_matching_idx
+from rubiks.utils import get_color, get_matching_idx, move
 
 class FridrichSolver:
     def __init__(self):
@@ -38,6 +39,9 @@ class FridrichSolver:
     def take_action(self, action):
         self.last_action = action
         self.state, self.r, self.done, _, _ = self.env.step(action)
+
+    def move(self, actions):
+        move(actions, self.take_action)
 
     def white_cross_solved(self):
         ## blue side
@@ -75,7 +79,7 @@ class FridrichSolver:
                 ## do nothing, the white green piece is in the right place
                 pass
             elif row == 0 and col == 1:
-                passdd
+                self.move(".b.ubu")
         elif side == RED:
             pass
         elif side == ORANGE:
@@ -83,7 +87,11 @@ class FridrichSolver:
         elif side == YELLOW:
             pass
         elif side == GREEN:
-            pass
+            if row == 0 and col == 1:
+                self.move(".ubu")
+            if row == 1 and col == 0:
+                self.move('r.ubu')
+
         elif side == BLUE:
             pass
         else:
@@ -91,16 +99,18 @@ class FridrichSolver:
 
     def solve_white_cross(self):
         self.white_cross_s1(GREEN)
+        self.white_cross_s1(BLUE)
 
 
 
     def solve(self):
-        self.state, _ = self.env.reset(seed=1, options={'scramble': True})
+        self.state, _ = self.env.reset(seed=0, options={'scramble': True})
         # self.scramble()
-        self.env.render()
+        # self.env.render()
 
         print(self.white_cross_solved())
         self.solve_white_cross()
+        self.env.render()
 
         # done = False
         # while not done:
