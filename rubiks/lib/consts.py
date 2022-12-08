@@ -5,6 +5,16 @@ YELLOW=3
 GREEN=4
 BLUE=5
 
+color_vals = {
+        0: "W",
+        1: "R",
+        2: "O",
+        3: "Y",
+        4: "G",
+        5: "B"
+}
+
+
 UP=0
 DOWN=1
 LEFT=2

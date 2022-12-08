@@ -6,7 +6,9 @@ import numpy as np
 import random
 
 import gym
-from rubiks.consts import *
+from rubiks.lib.consts import *
+from contextlib import contextmanager
+from rubiks.utils import rotate_state
 
 class RubiksCubeEnv(gym.Env):
 
@@ -74,6 +76,7 @@ class RubiksCubeEnv(gym.Env):
     def _scramble(self, steps):
         for _ in range(steps):
             action = random.randint(0, 11)
+            print(self.actionList[action])
             self._action(action)
 
 
@@ -196,13 +199,15 @@ class RubiksCubeEnv(gym.Env):
         return self.state, reward, done, False, {}
 
     def rotate_cube(self):
-        self.state[:,:,WHITE] = np.rot90(self.state[:,:,WHITE], k=3)
-        tmp = np.copy(self.state[:,:,RED])
-        self.state[:,:,RED] = np.rot90(self.state[:,:,BLUE],k=3)
-        self.state[:,:,BLUE] = np.rot90(self.state[:,:,ORANGE],k=3)
-        self.state[:,:,ORANGE] = np.rot90(self.state[:,:,GREEN],k=3)
-        self.state[:,:,GREEN] = np.rot90(tmp, k=3)
-        self.state[:,:,YELLOW] = np.rot90(self.state[:,:,YELLOW],k=1)
+        self.state = rotate_state(self.state)
 
 
-        self.state = np.array(self.state)
+    @contextmanager
+    def rotate_cube_context(self, k=1):
+        assert 0 < k < 4, "can only rotate 1-3 times"
+        for i in range(k):
+            self.rotate_cube()
+        yield
+
+        for i in range(4-k):
+            self.rotate_cube()

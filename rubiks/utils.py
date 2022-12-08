@@ -1,4 +1,5 @@
-from rubiks.consts import *
+from rubiks.lib.consts import *
+import numpy as np
 
 def get_color(side):
     if side == WHITE:
@@ -36,7 +37,7 @@ def get_matching_idx(pos):
         elif pos == (1,0):
             return [1,2,BLUE,LEFT], None
         elif pos == (1,2):
-            return [2,0,GREEN,RIGHT], None
+            return [1,0,GREEN,RIGHT], None
         elif pos == (2,0):
             return [2,2,BLUE,LEFT], [0,0,ORANGE,DOWN]
         elif pos == (2,1):
@@ -57,7 +58,7 @@ def get_matching_idx(pos):
         elif pos == (0,0):
             return [0,0,BLUE,LEFT], [0,2,YELLOW,UP]
         elif pos == (0,1):
-            return [1,2,YELLOW,UP], None
+            return [0,1,YELLOW,UP], None
         elif pos == (0,2):
             return [0,2,GREEN,RIGHT], [0,0,YELLOW,UP]
         pass
@@ -88,7 +89,7 @@ def get_matching_idx(pos):
         elif pos == (1,0):
             return [1,2,GREEN,LEFT], None
         elif pos == (1,2):
-            return [1,2,BLUE,RIGHT], None
+            return [1,0,BLUE,RIGHT], None
         elif pos == (2,0):
             return [2,2,GREEN,LEFT], [2,2,ORANGE,DOWN]
         elif pos == (2,1):
@@ -157,3 +158,14 @@ def move(actions, func):
             rets.append(func(action_num))
 
     return rets
+
+def rotate_state(state):
+    state[:, :, WHITE] = np.rot90(state[:, :, WHITE], k=3)
+    tmp = np.copy(state[:, :, RED])
+    state[:, :, RED] = np.rot90(state[:, :, BLUE], k=3)
+    state[:, :, BLUE] = np.rot90(state[:, :, ORANGE], k=3)
+    state[:, :, ORANGE] = np.rot90(state[:, :, GREEN], k=3)
+    state[:, :, GREEN] = np.rot90(tmp, k=3)
+    state[:, :, YELLOW] = np.rot90(state[:, :, YELLOW], k=1)
+
+    return np.array(state)

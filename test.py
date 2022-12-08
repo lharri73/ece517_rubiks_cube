@@ -1,5 +1,3 @@
-from rubiks.env.cube import RubiksCubeEnv
-from rubiks.consts import *
 import gym
 
 env = gym.make("RubiksCube-v1")

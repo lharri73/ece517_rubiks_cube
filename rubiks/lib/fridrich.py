@@ -1,18 +1,13 @@
-import functools
-import operator
-
 import gym
 import gym.spaces
-from rubiks.env.cube import RubiksCubeEnv
-import time
 import random
-from rubiks.consts import *
+from rubiks.lib.consts import *
 from rubiks.utils import get_color, get_matching_idx, move
 import numpy as np
 
 class FridrichSolver:
     def __init__(self):
-        self.env = gym.make("RubiksCube")
+        self.env = gym.make("RubiksCube-v1")
         self.state = None
         self.r = 0
         self.done = False
@@ -42,6 +37,7 @@ class FridrichSolver:
         self.state, self.r, self.done, _, _ = self.env.step(action)
 
     def move(self, actions):
+        print(actions)
         move(actions, self.take_action)
 
     def white_cross_solved(self):
@@ -49,7 +45,7 @@ class FridrichSolver:
         blue_solved = self.state[1,2,BLUE] == BLUE and self.state[1,0,WHITE] == WHITE
 
         ## red side
-        red_solved = self.state[2,2,RED] == RED and self.state[0,2,WHITE] == WHITE
+        red_solved = self.state[2,1,RED] == RED and self.state[0,1,WHITE] == WHITE
 
         ## green solved
         green_solved = self.state[1,0,GREEN] == GREEN and self.state[1,2,WHITE] == WHITE
@@ -61,6 +57,9 @@ class FridrichSolver:
 
 
     def find_middle_piece(self, target1=GREEN, target2=WHITE):
+        """
+        side will be the side that target1 is on
+        """
         breaker = False
         for row, col, dir in [(0,1,UP), (1,2,RIGHT), (2,1,DOWN), (1,0,LEFT)]:
             for side in [WHITE, RED, ORANGE, YELLOW, GREEN, BLUE]:
@@ -84,45 +83,100 @@ class FridrichSolver:
 
     def white_cross_s1(self, target=GREEN):
         row, col, side = self.find_middle_piece(WHITE, target)
-        self.rotate_idx_90(0,0)
+        # self.rotate_idx_90(0,0)
+        print(f"found white/green on {get_color(side)}")
         if side == WHITE:
-            if row == 1 and col == 2:
-                ## do nothing, the white green piece is in the right place
-                pass
-            elif row == 0 and col == 1:
+            if row == 0 and col == 1:
                 self.move(".b.ubu")
+            elif row == 1 and col == 0:
+                self.move('luu.luu')
+            elif row == 1 and col == 2:
+                ## in the right place
+                pass
+            elif row == 2 and col == 1:
+                self.move('fu.f.u')
                 pass
         elif side == RED:
-            pass
+            if row == 1 and col == 0:
+                self.move('uuluu')
+            elif row == 0 and col ==1:
+                self.move('.ubu.r')
+            elif row == 1 and col == 2:
+                self.move('.r')
+            elif row == 2 and col == 1:
+                self.move('.b.r')
         elif side == ORANGE:
-            pass
+            if row == 0  and col == 1:
+                self.move('fr')
+            elif row == 1 and col == 0:
+                self.move('uu.luu')
+            elif row == 1 and col == 2:
+                self.move('r')
+            elif row == 2 and col == 1:
+                self.move('u.f.ur')
         elif side == YELLOW:
+            if row == 0 and col == 1:
+                self.move('.drr')
+            elif row == 1 and col == 0:
+                self.move('rr')
+            elif row == 1 and col == 2:
+                self.move('ddrr')
+            elif row == 2 and col == 1:
+                self.move('drr')
             pass
         elif side == GREEN:
             if row == 0 and col == 1:
                 self.move(".ubu")
-            if row == 1 and col == 0:
+            elif row == 1 and col == 0:
                 self.move('r.ubu')
-
+            elif row == 1 and col == 2:
+                self.move('.r.ubu')
+            elif row == 2 and col == 1:
+                self.move('u.f.u')
         elif side == BLUE:
-            pass
+            if row == 0 and col == 1:
+                self.move('.u.bu')
+            elif row == 1 and col == 0:
+                self.move('d.frf')
+            elif row == 1 and col == 2:
+                self.move('luf.u')
+            elif row ==2 and col == 1:
+                self.move('uf.u')
         else:
             raise ValueError("cannot find piece during white cross solve")
 
     def solve_white_cross(self):
         self.white_cross_s1(GREEN)
+        self.env.rotate_cube()
+        self.white_cross_s1(RED)
+        self.env.rotate_cube()
         self.white_cross_s1(BLUE)
+        self.env.rotate_cube()
+        self.white_cross_s1(ORANGE)
+        self.env.rotate_cube()
+
+
+    def solve_corners(self):
 
 
 
-    def solve(self):
-        self.state, _ = self.env.reset(seed=0, options={'scramble': True})
+    def solve(self, seed=None, render=True):
+        if seed is None:
+            seed = random.randint(0,int(1e99))
+
+        print(seed)
+        self.state, _ = self.env.reset(seed=seed, options={"scramble": False})
+        self.move('.r.ful')
         # self.scramble()
-        # self.env.render()
 
-        print(self.white_cross_solved())
+        if render:
+            self.env.render()
+
+        # print(self.white_cross_solved())
         self.solve_white_cross()
-        self.env.render()
+        if render:
+            self.env.render()
+
 
         # done = False
         # while not done:
@@ -133,6 +187,18 @@ class FridrichSolver:
         #     input()
 
 
-if __name__ == "__main__":
+def solve_many():
     solver = FridrichSolver()
-    solver.solve()
+    for i in range(100000):
+        print(f'i = {i:6d}, seed = ', end='')
+        solver.solve(seed=None,render=False)
+        assert solver.white_cross_solved()
+
+def solve_once():
+    solver = FridrichSolver();
+    solver.solve(seed=0,render=True)
+
+if __name__ == "__main__":
+    solve_once()
+
+
