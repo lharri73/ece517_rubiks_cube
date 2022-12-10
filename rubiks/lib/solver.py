@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 class Solver(ABC):
     def __init__(self):
         self.state = None
+        self.solved = False
 
     @abstractmethod
     def init_scramble(self, env):
@@ -22,6 +23,6 @@ class Solver(ABC):
     def get_moves(self):
         pass
 
-    # @abstractmethod
-    # def get_intermediate_state(self):
-    #     pass
+    @abstractmethod
+    def get_intermediate_states(self):
+        pass

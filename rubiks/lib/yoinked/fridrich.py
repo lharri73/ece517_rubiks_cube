@@ -1,15 +1,15 @@
 # Shamelessly copied from
 # https://raw.githubusercontent.com/CubeLuke/Rubiks-Cube-Solver/master/cube.py
-from random import randint
-import copy, webbrowser, os
 
-import gym
 
-from rubiks.lib.solver import Solver
-from rubiks.utils import rotate_state
-from rubiks.lib.consts import *
-from rubiks.env.cube import RubiksCubeEnv
 import numpy as np
+
+from rubiks.lib.consts import *
+from rubiks.lib.solver import Solver
+import gym
+from rubiks.env.cube import RubiksCubeEnv
+from rubiks.utils import rotate_state_rev
+
 
 
 # This is the Cube Solver
@@ -25,27 +25,34 @@ class Fridrich(Solver):
         self.f2l_list = []
         self.moves_list = []
         self.solution_length = 0
+        self.initial_scramble = []
 
     def print_cube(self):
-        print('\t\t' + str(self.internal_state[5][0]) + '\n\t\t' + str(self.internal_state[5][1]) + '\n\t\t' + str(self.internal_state[5][2]))
-        print(str(self.internal_state[3][0]) + ' ' + str(self.internal_state[0][0]) + ' ' + str(self.internal_state[2][0]))
-        print(str(self.internal_state[3][1]) + ' ' + str(self.internal_state[0][1]) + ' ' + str(self.internal_state[2][1]))
-        print(str(self.internal_state[3][2]) + ' ' + str(self.internal_state[0][2]) + ' ' + str(self.internal_state[2][2]))
-        print('\t\t' + str(self.internal_state[1][0]) + '\n\t\t' + str(self.internal_state[1][1]) + '\n\t\t' + str(self.internal_state[1][2]))
-        print('\t\t' + str(self.internal_state[4][0]) + '\n\t\t' + str(self.internal_state[4][1]) + '\n\t\t' + str(self.internal_state[4][2]))
-
+        print('\t\t' + str(self.internal_state[5][0]) + '\n\t\t' + str(self.internal_state[5][1]) + '\n\t\t' + str(
+            self.internal_state[5][2]))
+        print(str(self.internal_state[3][0]) + ' ' + str(self.internal_state[0][0]) + ' ' + str(
+            self.internal_state[2][0]))
+        print(str(self.internal_state[3][1]) + ' ' + str(self.internal_state[0][1]) + ' ' + str(
+            self.internal_state[2][1]))
+        print(str(self.internal_state[3][2]) + ' ' + str(self.internal_state[0][2]) + ' ' + str(
+            self.internal_state[2][2]))
+        print('\t\t' + str(self.internal_state[1][0]) + '\n\t\t' + str(self.internal_state[1][1]) + '\n\t\t' + str(
+            self.internal_state[1][2]))
+        print('\t\t' + str(self.internal_state[4][0]) + '\n\t\t' + str(self.internal_state[4][1]) + '\n\t\t' + str(
+            self.internal_state[4][2]))
 
     def init_scramble(self, env):
 
-        self.internal_state = np.zeros((6,3,3), dtype=np.uint8).tolist()
+        self.internal_state = np.zeros((6, 3, 3), dtype=np.uint8).tolist()
+        self.initial_scramble = env.actions_taken
 
         # with env.rotate_cube_context():
-        for f_side, our_side in zip(range(6),[WHITE,GREEN,RED,ORANGE,YELLOW,BLUE]):
+        for f_side, our_side in zip(range(6), [WHITE, GREEN, RED, ORANGE, YELLOW, BLUE]):
             cur_state = np.array(env.state[:, :, our_side])
-            cur_state = np.rot90(cur_state,k=3)
+            cur_state = np.rot90(cur_state, k=3)
             for row in range(3):
                 for col in range(3):
-                    self.internal_state[f_side][row][col] = color_vals[cur_state[row,col]]
+                    self.internal_state[f_side][row][col] = color_vals[cur_state[row, col]]
 
     def solve(self):
         self.cross()
@@ -61,8 +68,10 @@ class Fridrich(Solver):
         self.step_moves_list[2] = self.solution_length - self.step_moves_list[1] - self.step_moves_list[0]
         self.bPLL()
         self.simplify_moves()
-        self.step_moves_list[3] = self.solution_length - self.step_moves_list[2] - self.step_moves_list[1] - self.step_moves_list[0]
+        self.step_moves_list[3] = self.solution_length - self.step_moves_list[2] - self.step_moves_list[1] - \
+                                  self.step_moves_list[0]
         self.simplify_moves()
+        self.solved = True
 
     def simplify_moves(self):
         new_list = []
@@ -200,13 +209,19 @@ class Fridrich(Solver):
         fmid = self.internal_state[1][1][1]
         dmid = self.internal_state[4][1][1]
         # corner orientations if in U layer, first letter means the direction that the color is facing
-        fCorU = self.internal_state[1][0][2] == dmid and self.internal_state[0][2][2] == fmid and self.internal_state[2][2][0] == rmid
-        rCorU = self.internal_state[2][2][0] == dmid and self.internal_state[1][0][2] == fmid and self.internal_state[0][2][2] == rmid
-        uCorU = self.internal_state[0][2][2] == dmid and self.internal_state[2][2][0] == fmid and self.internal_state[1][0][2] == rmid
+        fCorU = self.internal_state[1][0][2] == dmid and self.internal_state[0][2][2] == fmid and \
+                self.internal_state[2][2][0] == rmid
+        rCorU = self.internal_state[2][2][0] == dmid and self.internal_state[1][0][2] == fmid and \
+                self.internal_state[0][2][2] == rmid
+        uCorU = self.internal_state[0][2][2] == dmid and self.internal_state[2][2][0] == fmid and \
+                self.internal_state[1][0][2] == rmid
         # Corner orientations for correct location in D layer
-        fCorD = self.internal_state[1][2][2] == dmid and self.internal_state[2][2][2] == fmid and self.internal_state[4][0][2] == rmid
-        rCorD = self.internal_state[2][2][2] == dmid and self.internal_state[4][0][2] == fmid and self.internal_state[1][2][2] == rmid
-        dCorD = self.internal_state[4][0][2] == dmid and self.internal_state[1][2][2] == fmid and self.internal_state[2][2][2] == rmid  # This is solved spot
+        fCorD = self.internal_state[1][2][2] == dmid and self.internal_state[2][2][2] == fmid and \
+                self.internal_state[4][0][2] == rmid
+        rCorD = self.internal_state[2][2][2] == dmid and self.internal_state[4][0][2] == fmid and \
+                self.internal_state[1][2][2] == rmid
+        dCorD = self.internal_state[4][0][2] == dmid and self.internal_state[1][2][2] == fmid and \
+                self.internal_state[2][2][2] == rmid  # This is solved spot
         # edge orientations on U layer, normal or flipped version based on F face
         norEdgeFU = self.internal_state[1][0][1] == fmid and self.internal_state[0][2][1] == rmid
         norEdgeLU = self.internal_state[3][1][2] == fmid and self.internal_state[0][1][0] == rmid
@@ -219,11 +234,14 @@ class Fridrich(Solver):
         flipEdgeRU = self.internal_state[0][1][2] == fmid and self.internal_state[2][1][0] == rmid
         flipEdgeAny = flipEdgeFU or flipEdgeLU or flipEdgeBU or flipEdgeRU
         # edge orientations for normal or flipped insertion into slot
-        norEdgeInsert = self.internal_state[1][1][2] == fmid and self.internal_state[2][2][1] == rmid  # This is solved spot
+        norEdgeInsert = self.internal_state[1][1][2] == fmid and self.internal_state[2][2][
+            1] == rmid  # This is solved spot
         flipEdgeInsert = self.internal_state[2][2][1] == fmid and self.internal_state[1][1][2] == rmid
         # these are for if the back right or front left slots are open or not
-        backRight = self.internal_state[4][2][2] == dmid and self.internal_state[5][1][2] == self.internal_state[5][0][2] == self.internal_state[5][1][1] and self.internal_state[2][0][1] == self.internal_state[2][0][2] == rmid
-        frontLeft = self.internal_state[4][0][0] == dmid and self.internal_state[1][1][0] == self.internal_state[1][2][0] == fmid and self.internal_state[3][2][0] == self.internal_state[3][2][1] == self.internal_state[3][1][1]
+        backRight = self.internal_state[4][2][2] == dmid and self.internal_state[5][1][2] == self.internal_state[5][0][
+            2] == self.internal_state[5][1][1] and self.internal_state[2][0][1] == self.internal_state[2][0][2] == rmid
+        frontLeft = self.internal_state[4][0][0] == dmid and self.internal_state[1][1][0] == self.internal_state[1][2][
+            0] == fmid and self.internal_state[3][2][0] == self.internal_state[3][2][1] == self.internal_state[3][1][1]
 
         if dCorD and norEdgeInsert:
             return
@@ -379,20 +397,26 @@ class Fridrich(Solver):
 
     # Returns true if the f2l Corner in FR spot is inserted and oriented correctly
     def f2lCorner(self):
-        return self.internal_state[4][0][2] == self.internal_state[4][1][1] and self.internal_state[1][2][2] == self.internal_state[1][1][1] and self.internal_state[2][2][2] == self.internal_state[2][1][1]  # This is solved spot
+        return self.internal_state[4][0][2] == self.internal_state[4][1][1] and self.internal_state[1][2][2] == \
+            self.internal_state[1][1][1] and self.internal_state[2][2][2] == self.internal_state[2][1][
+                1]  # This is solved spot
 
     # Returns true if the f2l edge in FR spot is inserted and oriented correctly
     def f2lEdge(self):
-        return self.internal_state[1][1][2] == self.internal_state[1][1][1] and self.internal_state[2][2][1] == self.internal_state[2][1][1]  # This is solved spot
+        return self.internal_state[1][1][2] == self.internal_state[1][1][1] and self.internal_state[2][2][1] == \
+            self.internal_state[2][1][1]  # This is solved spot
 
     def f2lCornerInserted(self):
         rmid = self.internal_state[2][1][1]
         fmid = self.internal_state[1][1][1]
         dmid = self.internal_state[4][1][1]
         # Corner orientations for correct location in D layer
-        fCorD = self.internal_state[1][2][2] == dmid and self.internal_state[2][2][2] == fmid and self.internal_state[4][0][2] == rmid
-        rCorD = self.internal_state[2][2][2] == dmid and self.internal_state[4][0][2] == fmid and self.internal_state[1][2][2] == rmid
-        dCorD = self.internal_state[4][0][2] == dmid and self.internal_state[1][2][2] == fmid and self.internal_state[2][2][2] == rmid  # This is solved spot
+        fCorD = self.internal_state[1][2][2] == dmid and self.internal_state[2][2][2] == fmid and \
+                self.internal_state[4][0][2] == rmid
+        rCorD = self.internal_state[2][2][2] == dmid and self.internal_state[4][0][2] == fmid and \
+                self.internal_state[1][2][2] == rmid
+        dCorD = self.internal_state[4][0][2] == dmid and self.internal_state[1][2][2] == fmid and \
+                self.internal_state[2][2][2] == rmid  # This is solved spot
         return fCorD or rCorD or dCorD
 
     # returns true if the f2l edge is inserted. Can be properly orientated, or flipped.
@@ -400,21 +424,22 @@ class Fridrich(Solver):
         rmid = self.internal_state[2][1][1]
         fmid = self.internal_state[1][1][1]
         # edge orientations for normal or flipped insertion into slot
-        norEdgeInsert = self.internal_state[1][1][2] == fmid and self.internal_state[2][2][1] == rmid  # This is solved spot
+        norEdgeInsert = self.internal_state[1][1][2] == fmid and self.internal_state[2][2][
+            1] == rmid  # This is solved spot
         flipEdgeInsert = self.internal_state[2][2][1] == fmid and self.internal_state[1][1][2] == rmid
         return norEdgeInsert or flipEdgeInsert
-
-
 
     # Solves the top cross as part of the OLL step
     def topCross(self):
         # if all the edges are all equal to eachother (all being white)
-        if self.internal_state[0][0][1] == self.internal_state[0][1][0] == self.internal_state[0][1][2] == self.internal_state[0][2][1]:
+        if self.internal_state[0][0][1] == self.internal_state[0][1][0] == self.internal_state[0][1][2] == \
+                self.internal_state[0][2][1]:
             # print("Cross already done, step skipped")
             return
         # If this is true, we have our cross and we can go onto the next step
         else:
-            while self.internal_state[0][0][1] != "W" or self.internal_state[0][1][0] != "W" or self.internal_state[0][1][2] != "W" or self.internal_state[0][2][1] != "W":
+            while self.internal_state[0][0][1] != "W" or self.internal_state[0][1][0] != "W" or \
+                    self.internal_state[0][1][2] != "W" or self.internal_state[0][2][1] != "W":
                 if self.internal_state[0][1][0] == self.internal_state[0][1][2]:
                     # if we have a horizontal line Just do alg
                     self.m("F R U Ri Ui Fi")
@@ -423,17 +448,18 @@ class Fridrich(Solver):
                     # if we have a vertical line, do a U then alg
                     self.m("U F R U Ri Ui Fi")
                     break
-                elif self.internal_state[0][0][1] != "W" and self.internal_state[0][1][0] != "W" and self.internal_state[0][1][2] != "W" and self.internal_state[0][2][1] != "W":
+                elif self.internal_state[0][0][1] != "W" and self.internal_state[0][1][0] != "W" and \
+                        self.internal_state[0][1][2] != "W" and self.internal_state[0][2][1] != "W":
                     # This would mean we have a dot case, so perform
                     self.m("F U R Ui Ri Fi U F R U Ri Ui Fi")
                     break
-                elif self.internal_state[0][1][2] == self.internal_state[0][2][1] or self.internal_state[0][0][1] == self.internal_state[0][1][0]:
+                elif self.internal_state[0][1][2] == self.internal_state[0][2][1] or self.internal_state[0][0][1] == \
+                        self.internal_state[0][1][0]:
                     # If we have an L case in the top left or the bottom right, will give us a line
                     self.m("F R U Ri Ui Fi")
                 else:
                     # This is we dont have a line, dot, cross, or L in top left or bottom right
                     self.m("U")
-
 
     # This is for the case where the Edge is inserted, but the corner is not
     def f2lEdgeNoCorner(self):
@@ -473,7 +499,6 @@ class Fridrich(Solver):
 
         if not self.f2lCorrect():
             raise Exception("Exception found in f2lEdgeNoCorner()")
-
 
     # This is the case for if the corner is inserted, but the edge is not
     def f2lCornerNoEdge(self):
@@ -580,7 +605,6 @@ class Fridrich(Solver):
         if not self.f2lCorrect():
             raise Exception("Exception found in f2lCornerTopNoEdge()")
 
-
     # This is the case for if the edge is on top, and the corner is not. Neither are inserted properly. Corner must be in another slot.
     # The lookahead for this step is comparing the back edge to the slots, rather than the front one like other cases have
     def f2lEdgeTopNoCorner(self):
@@ -623,7 +647,6 @@ class Fridrich(Solver):
         if not self.f2lCorrect():
             raise Exception("Exception found in f2lEdgeTopNoCorner()")
 
-
     # Returns true if there is an f2l Edge located in the FU position
     def f2lFUEdge(self):
         rmid = self.internal_state[2][1][1]
@@ -631,7 +654,6 @@ class Fridrich(Solver):
         norEdgeFU = self.internal_state[1][0][1] == fmid and self.internal_state[0][2][1] == rmid
         flipEdgeFU = self.internal_state[0][2][1] == fmid and self.internal_state[1][0][1] == rmid
         return norEdgeFU or flipEdgeFU
-
 
     # Will return the loction of the corner that belongs in the FR spot. Either returns BR, BL, FL, or FR.
     def f2lCornerCheck(self):
@@ -670,16 +692,20 @@ class Fridrich(Solver):
             raise Exception("f2lEdgeCheck() Exception")
 
     # This is used to determine if the front f2l edge is inserted or not, the parameter is for the requested edge. takes BR, BL, and FL as valid
-    def f2lEdgeInserted2(self,p):
+    def f2lEdgeInserted2(self, p):
         rmid = self.internal_state[2][1][1]
         fmid = self.internal_state[1][1][1]
         # edge orientations for normal or flipped insertion into slot
-        norEdgeInsert = self.internal_state[1][1][2] == fmid and self.internal_state[2][2][1] == rmid  # This is solved spot
+        norEdgeInsert = self.internal_state[1][1][2] == fmid and self.internal_state[2][2][
+            1] == rmid  # This is solved spot
         flipEdgeInsert = self.internal_state[2][2][1] == fmid and self.internal_state[1][1][2] == rmid
         # Edge orientations in comparison to Front and Right colors
-        BR = (self.internal_state[5][1][2] == fmid and self.internal_state[2][0][1] == rmid) or (self.internal_state[5][1][2] == rmid and self.internal_state[2][0][1] == fmid)
-        BL = (self.internal_state[3][0][1] == fmid and self.internal_state[5][1][0] == rmid) or (self.internal_state[3][0][1] == rmid and self.internal_state[5][1][0] == fmid)
-        FL = (self.internal_state[3][2][1] == fmid and self.internal_state[1][1][0] == rmid) or (self.internal_state[3][2][1] == rmid and self.internal_state[1][1][0] == fmid)
+        BR = (self.internal_state[5][1][2] == fmid and self.internal_state[2][0][1] == rmid) or (
+                self.internal_state[5][1][2] == rmid and self.internal_state[2][0][1] == fmid)
+        BL = (self.internal_state[3][0][1] == fmid and self.internal_state[5][1][0] == rmid) or (
+                self.internal_state[3][0][1] == rmid and self.internal_state[5][1][0] == fmid)
+        FL = (self.internal_state[3][2][1] == fmid and self.internal_state[1][1][0] == rmid) or (
+                self.internal_state[3][2][1] == rmid and self.internal_state[1][1][0] == fmid)
 
         if p == "BR":
             if BR:
@@ -698,7 +724,6 @@ class Fridrich(Solver):
             if norEdgeInsert or flipEdgeInsert:
                 return True
         return False
-
 
     # This is the case for if the edge or corner are not on top, and not inserted properly. They must both be in other slots.
     def f2lNoEdgeOrCorner(self):
@@ -743,15 +768,17 @@ class Fridrich(Solver):
         if not self.f2lCorrect():
             raise Exception("Exception found in f2lNoEdgeOrCorner()")
 
-
     # Will return true if the f2l is completed
     def isf2lDone(self):
-        rside = self.internal_state[2][0][1] == self.internal_state[2][0][2] == self.internal_state[2][1][1] == self.internal_state[2][1][2] == self.internal_state[2][2][1] == self.internal_state[2][2][2]
-        bside = self.internal_state[5][0][0] == self.internal_state[5][0][1] == self.internal_state[5][0][2] == self.internal_state[5][1][0] == self.internal_state[5][1][1] == self.internal_state[5][1][2]
-        lside = self.internal_state[3][0][0] == self.internal_state[3][0][1] == self.internal_state[3][1][0] == self.internal_state[3][1][1] == self.internal_state[3][2][0] == self.internal_state[3][2][1]
-        fside = self.internal_state[1][1][0] == self.internal_state[1][1][1] == self.internal_state[1][1][2] == self.internal_state[1][2][0] == self.internal_state[1][2][1] == self.internal_state[1][2][2]
+        rside = self.internal_state[2][0][1] == self.internal_state[2][0][2] == self.internal_state[2][1][1] == \
+                self.internal_state[2][1][2] == self.internal_state[2][2][1] == self.internal_state[2][2][2]
+        bside = self.internal_state[5][0][0] == self.internal_state[5][0][1] == self.internal_state[5][0][2] == \
+                self.internal_state[5][1][0] == self.internal_state[5][1][1] == self.internal_state[5][1][2]
+        lside = self.internal_state[3][0][0] == self.internal_state[3][0][1] == self.internal_state[3][1][0] == \
+                self.internal_state[3][1][1] == self.internal_state[3][2][0] == self.internal_state[3][2][1]
+        fside = self.internal_state[1][1][0] == self.internal_state[1][1][1] == self.internal_state[1][1][2] == \
+                self.internal_state[1][2][0] == self.internal_state[1][2][1] == self.internal_state[1][2][2]
         return rside and bside and lside and fside
-
 
     def getfish(self):
         for i in range(4):
@@ -780,18 +807,20 @@ class Fridrich(Solver):
             raise Exception("Fish not set up")
         assert self.isTopSolved()
 
-
     # returns True if the top is solved
     def isTopSolved(self):
         # determines if the top of the cube is solved.
-        if self.internal_state[0][0][0] == self.internal_state[0][0][1] == self.internal_state[0][0][2] == self.internal_state[0][1][0] == self.internal_state[0][1][1] == self.internal_state[0][1][2] == self.internal_state[0][2][0] == self.internal_state[0][2][1] == \
+        if self.internal_state[0][0][0] == self.internal_state[0][0][1] == self.internal_state[0][0][2] == \
+                self.internal_state[0][1][0] == self.internal_state[0][1][1] == self.internal_state[0][1][2] == \
+                self.internal_state[0][2][0] == self.internal_state[0][2][1] == \
                 self.internal_state[0][2][2]:
             return True
         else:
             return False
 
     def fish(self):
-        return [self.internal_state[0][0][0], self.internal_state[0][0][2], self.internal_state[0][2][0], self.internal_state[0][2][2]].count(self.internal_state[0][1][1]) == 1
+        return [self.internal_state[0][0][0], self.internal_state[0][0][2], self.internal_state[0][2][0],
+                self.internal_state[0][2][2]].count(self.internal_state[0][1][1]) == 1
 
     def sune(self):
         self.m("R U Ri U R U2 Ri")
@@ -805,14 +834,16 @@ class Fridrich(Solver):
         fmid = self.internal_state[1][1][1]
         dmid = self.internal_state[4][1][1]
         # corner orientations if in U layer, first letter means the direction that the color is facing
-        fCorU = self.internal_state[1][0][2] == dmid and self.internal_state[0][2][2] == fmid and self.internal_state[2][2][0] == rmid
-        rCorU = self.internal_state[2][2][0] == dmid and self.internal_state[1][0][2] == fmid and self.internal_state[0][2][2] == rmid
-        uCorU = self.internal_state[0][2][2] == dmid and self.internal_state[2][2][0] == fmid and self.internal_state[1][0][2] == rmid
+        fCorU = self.internal_state[1][0][2] == dmid and self.internal_state[0][2][2] == fmid and \
+                self.internal_state[2][2][0] == rmid
+        rCorU = self.internal_state[2][2][0] == dmid and self.internal_state[1][0][2] == fmid and \
+                self.internal_state[0][2][2] == rmid
+        uCorU = self.internal_state[0][2][2] == dmid and self.internal_state[2][2][0] == fmid and \
+                self.internal_state[1][0][2] == rmid
         return fCorU or rCorU or uCorU
 
-
     # Tokenizes a string of moves
-    def m(self,s):
+    def m(self, s):
         s = str.replace(s, "'", "i")
         k = s.split(' ')
         self.solution_length += len(k)
@@ -821,9 +852,8 @@ class Fridrich(Solver):
             self.move(word)
         # self.print_cube()
 
-
     # performs a move by setting up, performing U moves, and undoing the setup
-    def move(self,mv):
+    def move(self, mv):
         mv = str.lower(mv)
         if mv == "u":
             self.U()
@@ -990,9 +1020,8 @@ class Fridrich(Solver):
         else:
             raise Exception("Invalid Move: " + str(mv))
 
-
     # rotates the entire cube along a particular axis
-    def rotate(self,axis):
+    def rotate(self, axis):
         axis = str.lower(axis)
         if axis == 'x':  # R
             temp = self.internal_state[0]
@@ -1030,7 +1059,6 @@ class Fridrich(Solver):
         else:
             raise Exception("Invalid rotation: " + axis)
 
-
     # performs a U move
     def U(self):
         # rotate U face
@@ -1062,16 +1090,14 @@ class Fridrich(Solver):
         self.internal_state[1][0][0] = self.internal_state[2][2][0]
         self.internal_state[2][2][0] = temp
 
-
     # Rotates a particular face counter-clockwise
-    def rotate_face_counterclockwise(self,face):
+    def rotate_face_counterclockwise(self, face):
         self.rotate_face_clockwise(face)
         self.rotate_face_clockwise(face)
         self.rotate_face_clockwise(face)
-
 
     # Rotates a particular face clockwise
-    def rotate_face_clockwise(self,face):
+    def rotate_face_clockwise(self, face):
         f_id = -1
         face = str.lower(face)
         if face == "u":
@@ -1099,7 +1125,6 @@ class Fridrich(Solver):
         self.internal_state[f_id][2][1] = self.internal_state[f_id][1][2]
         self.internal_state[f_id][1][2] = temp
 
-
     # puts a single edge piece in the proper location for the cross
     # Assumes the cross is formed on the bottom and is the yellow face
     # Checks all edges in front/up face, then back-right/left if needed
@@ -1116,7 +1141,6 @@ class Fridrich(Solver):
                         return
                     self.m("F")
                 self.m("U")
-
 
     # Performs the first step of the solution: the cross
     def cross(self):
@@ -1159,15 +1183,17 @@ class Fridrich(Solver):
         lSame = self.internal_state[3][1][1] == self.internal_state[3][1][0]
         assert all([fSame, rSame, bSame, lSame])
 
-
     # f2l will solve the first 2 layers, checks for each case, then does a Y move to check the next
     def getCornerState(self):
-        corner0 = self.internal_state[1][0][0] == self.internal_state[1][1][1] and self.internal_state[3][2][2] == self.internal_state[3][1][1]
-        corner1 = self.internal_state[1][0][2] == self.internal_state[1][1][1] and self.internal_state[2][2][0] == self.internal_state[2][1][1]
-        corner2 = self.internal_state[5][2][2] == self.internal_state[5][1][1] and self.internal_state[2][0][0] == self.internal_state[2][1][1]
-        corner3 = self.internal_state[5][2][0] == self.internal_state[5][1][1] and self.internal_state[3][0][2] == self.internal_state[3][1][1]
+        corner0 = self.internal_state[1][0][0] == self.internal_state[1][1][1] and self.internal_state[3][2][2] == \
+                  self.internal_state[3][1][1]
+        corner1 = self.internal_state[1][0][2] == self.internal_state[1][1][1] and self.internal_state[2][2][0] == \
+                  self.internal_state[2][1][1]
+        corner2 = self.internal_state[5][2][2] == self.internal_state[5][1][1] and self.internal_state[2][0][0] == \
+                  self.internal_state[2][1][1]
+        corner3 = self.internal_state[5][2][0] == self.internal_state[5][1][1] and self.internal_state[3][0][2] == \
+                  self.internal_state[3][1][1]
         return [corner0, corner1, corner2, corner3]
-
 
     # Does permutation of the top layer corners, orients them properly
     def permuteCorners(self):
@@ -1190,22 +1216,26 @@ class Fridrich(Solver):
                 self.m("U")
             self.m("R2 B2 R F Ri B2 R Fi R")
 
-
     # Does permutation of the top layer edges, must be H, Z or U perms after orientation
     def permuteEdges(self):
         if all(self.getEdgeState()):
             return
-        if self.internal_state[1][0][1] == self.internal_state[5][1][1] and self.internal_state[5][2][1] == self.internal_state[1][1][1]:  # H perm
+        if self.internal_state[1][0][1] == self.internal_state[5][1][1] and self.internal_state[5][2][1] == \
+                self.internal_state[1][1][1]:  # H perm
             self.m("R2 U2 R U2 R2 U2 R2 U2 R U2 R2")
-        elif self.internal_state[1][0][1] == self.internal_state[2][1][1] and self.internal_state[2][1][0] == self.internal_state[1][1][1]:  # Normal Z perm
+        elif self.internal_state[1][0][1] == self.internal_state[2][1][1] and self.internal_state[2][1][0] == \
+                self.internal_state[1][1][1]:  # Normal Z perm
             self.m("U Ri Ui R Ui R U R Ui Ri U R U R2 Ui Ri U")
-        elif self.internal_state[1][0][1] == self.internal_state[3][1][1] and self.internal_state[3][1][2] == self.internal_state[1][1][1]:  # Not oriented Z perm
+        elif self.internal_state[1][0][1] == self.internal_state[3][1][1] and self.internal_state[3][1][2] == \
+                self.internal_state[1][1][1]:  # Not oriented Z perm
             self.m("Ri Ui R Ui R U R Ui Ri U R U R2 Ui Ri U2")
         else:
             uNum = 0
             while True:
-                if self.internal_state[5][2][0] == self.internal_state[5][2][1] == self.internal_state[5][2][2]:  # solid bar is on back then
-                    if self.internal_state[3][1][2] == self.internal_state[1][0][0]:  # means we have to do counterclockwise cycle
+                if self.internal_state[5][2][0] == self.internal_state[5][2][1] == self.internal_state[5][2][
+                    2]:  # solid bar is on back then
+                    if self.internal_state[3][1][2] == self.internal_state[1][0][
+                        0]:  # means we have to do counterclockwise cycle
                         self.m("R Ui R U R U R Ui Ri Ui R2")
                         break
                     else:
@@ -1217,7 +1247,6 @@ class Fridrich(Solver):
             for x in range(uNum):
                 self.m("Ui")
 
-
     def getEdgeState(self):
         fEdge = self.internal_state[1][0][1] == self.internal_state[1][1][1]
         rEdge = self.internal_state[2][1][0] == self.internal_state[2][1][1]
@@ -1225,39 +1254,47 @@ class Fridrich(Solver):
         lEdge = self.internal_state[3][1][2] == self.internal_state[3][1][1]
         return [fEdge, rEdge, bEdge, lEdge]
 
-
     def topCorners(self):
         self.permuteCorners()
         assert all(self.getCornerState())
-
 
     def topEdges(self):
         self.permuteEdges()
         assert all(self.getEdgeState())
 
-
     def bPLL(self):
         self.topCorners()
         self.topEdges()
 
-
     def isSolved(self):
-        uside = self.internal_state[0][0][0] == self.internal_state[0][0][1] == self.internal_state[0][0][2] == self.internal_state[0][1][0] == self.internal_state[0][1][1] == self.internal_state[0][1][2] == self.internal_state[0][2][0] == self.internal_state[0][2][
-            1] == self.internal_state[0][2][2]
-        fside = self.internal_state[1][0][0] == self.internal_state[1][0][1] == self.internal_state[1][0][2] == self.internal_state[1][1][0] == self.internal_state[1][1][1] == self.internal_state[1][1][2] == self.internal_state[1][2][0] == self.internal_state[1][2][
-            1] == self.internal_state[1][2][2]
-        rside = self.internal_state[2][0][0] == self.internal_state[2][0][1] == self.internal_state[2][0][2] == self.internal_state[2][1][0] == self.internal_state[2][1][1] == self.internal_state[2][1][2] == self.internal_state[2][2][0] == self.internal_state[2][2][
-            1] == self.internal_state[2][2][2]
-        lside = self.internal_state[3][0][0] == self.internal_state[3][0][1] == self.internal_state[3][0][2] == self.internal_state[3][1][0] == self.internal_state[3][1][1] == self.internal_state[3][1][2] == self.internal_state[3][2][0] == self.internal_state[3][2][
-            1] == self.internal_state[3][2][2]
-        dside = self.internal_state[4][0][0] == self.internal_state[4][0][1] == self.internal_state[4][0][2] == self.internal_state[4][1][0] == self.internal_state[4][1][1] == self.internal_state[4][1][2] == self.internal_state[4][2][0] == self.internal_state[4][2][
-            1] == self.internal_state[4][2][2]
-        bside = self.internal_state[5][0][0] == self.internal_state[5][0][1] == self.internal_state[5][0][2] == self.internal_state[5][1][0] == self.internal_state[5][1][1] == self.internal_state[5][1][2] == self.internal_state[5][2][0] == self.internal_state[5][2][
-            1] == self.internal_state[5][2][2]
+        uside = self.internal_state[0][0][0] == self.internal_state[0][0][1] == self.internal_state[0][0][2] == \
+                self.internal_state[0][1][0] == self.internal_state[0][1][1] == self.internal_state[0][1][2] == \
+                self.internal_state[0][2][0] == self.internal_state[0][2][
+                    1] == self.internal_state[0][2][2]
+        fside = self.internal_state[1][0][0] == self.internal_state[1][0][1] == self.internal_state[1][0][2] == \
+                self.internal_state[1][1][0] == self.internal_state[1][1][1] == self.internal_state[1][1][2] == \
+                self.internal_state[1][2][0] == self.internal_state[1][2][
+                    1] == self.internal_state[1][2][2]
+        rside = self.internal_state[2][0][0] == self.internal_state[2][0][1] == self.internal_state[2][0][2] == \
+                self.internal_state[2][1][0] == self.internal_state[2][1][1] == self.internal_state[2][1][2] == \
+                self.internal_state[2][2][0] == self.internal_state[2][2][
+                    1] == self.internal_state[2][2][2]
+        lside = self.internal_state[3][0][0] == self.internal_state[3][0][1] == self.internal_state[3][0][2] == \
+                self.internal_state[3][1][0] == self.internal_state[3][1][1] == self.internal_state[3][1][2] == \
+                self.internal_state[3][2][0] == self.internal_state[3][2][
+                    1] == self.internal_state[3][2][2]
+        dside = self.internal_state[4][0][0] == self.internal_state[4][0][1] == self.internal_state[4][0][2] == \
+                self.internal_state[4][1][0] == self.internal_state[4][1][1] == self.internal_state[4][1][2] == \
+                self.internal_state[4][2][0] == self.internal_state[4][2][
+                    1] == self.internal_state[4][2][2]
+        bside = self.internal_state[5][0][0] == self.internal_state[5][0][1] == self.internal_state[5][0][2] == \
+                self.internal_state[5][1][0] == self.internal_state[5][1][1] == self.internal_state[5][1][2] == \
+                self.internal_state[5][2][0] == self.internal_state[5][2][
+                    1] == self.internal_state[5][2][2]
         return uside and fside and rside and lside and dside and bside
 
     # performs the inverse of setup to restore the cube's previous orientation
-    def undo(self,face):
+    def undo(self, face):
         face = str.lower(face)
         if face == "f":
             self.move("Xi")
@@ -1273,7 +1310,7 @@ class Fridrich(Solver):
             raise Exception("Invalid undo; face: " + face)
 
     # sets up the cube to perform a move by rotating that face to the top
-    def setup(self,face):
+    def setup(self, face):
         face = str.lower(face)
         if face == "f":
             self.move("X")
@@ -1288,9 +1325,8 @@ class Fridrich(Solver):
         else:
             raise Exception("Invalid setup; face: " + face)
 
-
     # Transforms a given move into the corresponding move after a Y-rotation
-    def yTransform(self,move):
+    def yTransform(self, move):
         if move[0] in ["U", "D"]:
             return move
         if move[0] == "F":
@@ -1304,44 +1340,42 @@ class Fridrich(Solver):
         raise Exception("Invalid move to yTransform: " + move)
 
     def get_moves(self):
-        ret = ''
+        assert self.solved, "Cube must be solved before getting moves"
+
+        ret = []
         transform = {
-                'F': 'f',
-                'U': 'u',
-                'R': 'r',
-                'L': 'l',
-                'B': 'b',
-                'D': 'd',
-                'Fi': '.f',
-                'Ui': '.u',
-                'Ri': '.r',
-                'Li': '.l',
-                'Bi': '.b',
-                'Di': '.d',
-                'F2': 'ff',
-                'U2': 'uu',
-                'R2': 'rr',
-                'L2': 'll',
-                'B2': 'bb',
-                'D2': 'dd'
+            'F': 'f',
+            'U': 'u',
+            'R': 'r',
+            'L': 'l',
+            'B': 'b',
+            'D': 'd',
+            'Fi': '.f',
+            'Ui': '.u',
+            'Ri': '.r',
+            'Li': '.l',
+            'Bi': '.b',
+            'Di': '.d',
+            'F2': 'ff',
+            'U2': 'uu',
+            'R2': 'rr',
+            'L2': 'll',
+            'B2': 'bb',
+            'D2': 'dd'
         }
         for move in self.moves_list:
-            ret += (transform[move])
+            ret.append(transform[move])
         return ret
-from rubiks.utils import move
 
-def main():
-    env = gym.make('RubiksCube-v1')
-    state, _ = env.reset(seed=1,options={"scramble": True})
-    with env.rotate_cube_context():
-        move("ru.rff.dfdff.urru.f.u.fuubuu.b.ur.b.rbufuu.fuuf.u.fufru.r.uru.r.u.fuuru.ruruu.ru.rf.rbbr.f.rbbrrurruru.r.u.r.u.ru.r", env.step)
-    solver = Fridrich()
-    solver.init_scramble(env)
-    solver.print_cube()
-    solver.solve()
+    def get_intermediate_states(self):
+        assert self.solved, "Cube must be solved before getting intermediate states"
 
-    print(solver.get_moves())
+        env: "RubiksCubeEnv" = gym.make('RubiksCube-v1')
+        env.reset(options={"fromList": self.initial_scramble})
+        states = []
+        with env.rotate_cube_context():
+            for move in self.moves_list:
+                state, _, _, _, _ = env.step(move)
+                states.append(rotate_state_rev(state))
 
-
-if __name__ == "__main__":
-    main()
+        return states

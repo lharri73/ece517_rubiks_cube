@@ -1,5 +1,6 @@
 from rubiks.lib.consts import *
 import numpy as np
+from matplotlib import pyplot as plt, colors
 
 def get_color(side):
     if side == WHITE:
@@ -169,3 +170,49 @@ def rotate_state(state):
     state[:, :, YELLOW] = np.rot90(state[:, :, YELLOW], k=1)
 
     return np.array(state)
+
+def rotate_state_rev(state):
+    state[:, :, WHITE] = np.rot90(state[:, :, WHITE], k=1)
+    tmp = np.copy(state[:, :, RED])
+    state[:, :, RED] = np.rot90(state[:, :, GREEN], k=1)
+    state[:, :, GREEN] = np.rot90(state[:, :, ORANGE], k=1)
+    state[:, :, ORANGE] = np.rot90(state[:, :, BLUE], k=1)
+    state[:, :, BLUE] = np.rot90(tmp, k=1)
+    state[:, :, YELLOW] = np.rot90(state[:, :, YELLOW], k=3)
+
+    return np.array(state)
+
+def vis_state(state, ax=None):
+    image = np.full((9, 12), 6)
+    image[3:6, 0:3] = state[:, :, BLUE]  ## Blue side
+    image[3:6, 3:6] = state[:, :, WHITE]  ## White side
+    image[3:6, 6:9] = state[:, :, GREEN]  ## Green Side
+    image[3:6, 9:12] = state[:, :, YELLOW]  ## Yellow side
+    image[0:3, 3:6] = state[:, :, RED]  ## red side
+    image[6:9, 3:6] = state[:, :, ORANGE]  ## orange side
+    cmap = {WHITE: 'white', RED: 'red', ORANGE: 'orange', YELLOW: 'yellow', GREEN: 'green', BLUE: 'blue'}
+
+    colorList = list(cmap.values()) + ["black"]
+    cmape = colors.ListedColormap(colorList)
+
+    if ax is None:
+        ax = plt.gca()
+
+    ax.imshow(image, cmap=cmape)
+    ax.text(4, 4, 'U', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+             verticalalignment='center')
+    ax.text(1, 4, 'L', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+             verticalalignment='center')
+    ax.text(4, 1, 'B', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+             verticalalignment='center')
+    ax.text(7, 4, 'R', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+             verticalalignment='center')
+    ax.text(10, 4, 'D', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+             verticalalignment='center')
+    ax.text(4, 7, 'F', fontsize='x-large', horizontalalignment='center', fontweight='bold',
+             verticalalignment='center')
+
+    if ax is None:
+        plt.axis('off')
+
+    return ax
