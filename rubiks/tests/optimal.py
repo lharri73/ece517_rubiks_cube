@@ -1,4 +1,4 @@
-import rubiks.lib.yoinked.optimal.solver as sv
+import twophase.solver  as sv
 
 def main():
     cubestring = 'DUUBULDBFRBFRRULLLBRDFFFBLURDBFDFDRFRULBLUFDURRBLBDUDL'
