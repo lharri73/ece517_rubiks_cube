@@ -182,6 +182,26 @@ def rotate_state_rev(state):
 
     return np.array(state)
 
+def rotate_state_about_left(state):
+    state[:,:,BLUE] = np.rot90(state[:,:,BLUE], k=3)
+    state[:,:,GREEN] = np.rot90(state[:,:,GREEN], k=1)
+    tmp = np.copy(state[:,:,WHITE])
+    state[:,:,WHITE] = state[:,:,RED]
+    state[:,:,RED] = np.flipud(np.fliplr(state[:,:,YELLOW]))
+    state[:,:,YELLOW] = np.flipud(np.fliplr(state[:,:,ORANGE]))
+    state[:,:,ORANGE] = tmp
+    return np.array(state)
+
+def rotate_state_about_right(state):
+    state[:,:,BLUE] = np.rot90(state[:,:,BLUE], k=1)
+    state[:,:,GREEN] = np.rot90(state[:,:,GREEN], k=3)
+    tmp = np.copy(state[:,:,WHITE])
+    state[:,:,WHITE] = state[:,:,ORANGE]
+    state[:,:,ORANGE] = np.flipud(np.fliplr(state[:,:,YELLOW]))
+    state[:,:,YELLOW] = np.flipud(np.fliplr(state[:,:,RED]))
+    state[:,:,RED] = tmp
+    return np.array(state)
+
 def vis_state(state, ax=None):
     image = np.full((9, 12), 6)
     image[3:6, 0:3] = state[:, :, BLUE]  ## Blue side

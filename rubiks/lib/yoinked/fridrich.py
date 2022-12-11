@@ -44,7 +44,7 @@ class Fridrich(Solver):
     def init_scramble(self, env):
 
         self.internal_state = np.zeros((6, 3, 3), dtype=np.uint8).tolist()
-        self.initial_scramble = env.actions_taken
+        self.initial_scramble = env.get_string_state()
 
         # with env.rotate_cube_context():
         for f_side, our_side in zip(range(6), [WHITE, GREEN, RED, ORANGE, YELLOW, BLUE]):
@@ -1342,7 +1342,6 @@ class Fridrich(Solver):
     def get_moves(self):
         assert self.solved, "Cube must be solved before getting moves"
 
-        ret = []
         transform = {
             'F': 'f',
             'U': 'u',
@@ -1364,14 +1363,13 @@ class Fridrich(Solver):
             'D2': 'dd'
         }
         for move in self.moves_list:
-            ret.append(transform[move])
-        return ret
+            yield transform[move]
 
     def get_intermediate_states(self):
         assert self.solved, "Cube must be solved before getting intermediate states"
 
         env: "RubiksCubeEnv" = gym.make('RubiksCube-v1')
-        env.reset(options={"fromList": self.initial_scramble})
+        env.reset(options={"fromState": self.initial_scramble})
         states = []
         with env.rotate_cube_context():
             for move in self.moves_list:

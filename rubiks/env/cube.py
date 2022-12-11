@@ -8,7 +8,7 @@ from gym.core import ActType, ObsType
 from matplotlib import pyplot as plt, colors
 
 from rubiks.lib.consts import *
-from rubiks.utils import rotate_state, rotate_state_rev, vis_state
+from rubiks.utils import rotate_state, rotate_state_rev, vis_state, rotate_state_about_left, rotate_state_about_right
 
 
 class RubiksCubeEnv(gym.Env):
@@ -31,6 +31,9 @@ class RubiksCubeEnv(gym.Env):
         self.step_count = 0
         self.actions_taken = []
 
+    def __str__(self):
+        return f"RubiksCubeEnv With {self.step_count} steps taken, current state: '{self.get_string_state()}'"
+
     def reset(self, seed=None, options=None):
         """
         Reset and randomize the cube
@@ -45,15 +48,20 @@ class RubiksCubeEnv(gym.Env):
         :return: state, {}
         """
         if options is None:
-            options = {'min': 5, 'max': 20, 'scramble': True, "fromList": None, 'print_scramble': False}
+            options = {'min': 5, 'max': 20, 'scramble': True, "fromList": None, 'print_scramble': False, 'fromState': None}
 
         random.seed(seed)
 
         for i in range(6):
             self.state[:, :, i] = i
 
+        assert options.get('fromList', None) is None or options.get('fromState', None) is None, "Cannot specify both fromList and fromState"
+
         if options.get("fromList", None) is not None:
             self._initialize_from_statelist(options.get("fromList", None))
+
+        if options.get('fromState', None) is not None:
+            self._initialize_from_state(options.get('fromState', None))
 
         if options.get('scramble', False) and options.get("fromList", None) is None:
             self._scramble(random.randint(options.get('min', 5), options.get('max', 20)),
@@ -73,7 +81,7 @@ class RubiksCubeEnv(gym.Env):
             self._action(action)
 
     def _action(self, action):
-        self.actions_taken.append(action)
+        #self.actions_taken.append(action)
 
         if action == 0:
             self.rotate_clockwise(ORANGE)
@@ -173,11 +181,15 @@ class RubiksCubeEnv(gym.Env):
 
     def rotate_cube_clock(self):
         self.state = rotate_state(self.state)
-        self.actions_taken.append(-1)
 
     def rotate_cube_cc(self):
         self.state = rotate_state_rev(self.state)
-        self.actions_taken.append(-2)
+
+    def rotate_cube_about_left(self):
+        self.state = rotate_state_about_left(self.state)
+
+    def rotate_cube_about_right(self):
+        self.state = rotate_state_about_right(self.state)
 
     @contextmanager
     def rotate_cube_context(self, k=1):
@@ -214,3 +226,20 @@ class RubiksCubeEnv(gym.Env):
                 self.rotate_cube_cc()
             else:
                 self._action(action)
+
+    def _initialize_from_state(self, state):
+        assert len(state) == 3*3*6, f"state must be 54 (3x3x6) long. Got {len(state)}"
+        j=0
+        for side in [WHITE, GREEN, ORANGE, YELLOW, BLUE, RED]:
+            for i in range(9):
+                if state[j] not in [WHITE, GREEN, ORANGE, YELLOW, BLUE, RED]:
+                    raise ValueError(f"state must be a list of 54 integers in [0,5]. Got {state[j]}")
+                self.state[i // 3, i % 3, side] = state[j]
+                j += 1
+
+    def get_string_state(self):
+        ret = ""
+        for side in [WHITE, GREEN, ORANGE, YELLOW, BLUE, RED]:
+            for i in range(9):
+                ret += str(int(self.state[i // 3, i % 3, side]))
+        return ret
