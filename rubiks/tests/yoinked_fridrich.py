@@ -1,5 +1,5 @@
-from rubiks.utils import move
 import gym
+# noinspection PyUnresolvedReferences
 from rubiks.env.cube import RubiksCubeEnv
 from rubiks.lib.yoinked.fridrich import Fridrich
 

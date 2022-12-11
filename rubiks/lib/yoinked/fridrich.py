@@ -7,8 +7,9 @@ import numpy as np
 from rubiks.lib.consts import *
 from rubiks.lib.solver import Solver
 import gym
+# noinspection PyUnresolvedReferences
 from rubiks.env.cube import RubiksCubeEnv
-from rubiks.utils import rotate_state_rev
+from rubiks.lib.utils.cube_utils import rotate_state_rev
 
 
 

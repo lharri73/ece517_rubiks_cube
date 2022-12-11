@@ -1,8 +1,9 @@
+# noinspection PyUnresolvedReferences
 from rubiks.env.cube import RubiksCubeEnv
 from sys import stdin
 import gym
 from matplotlib import pyplot as plt
-from utils import move
+from rubiks.lib.utils.cube_utils import move
 
 def reset():
     env = gym.make("RubiksCube-v1")

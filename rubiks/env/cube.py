@@ -8,7 +8,7 @@ from gym.core import ActType, ObsType
 from matplotlib import pyplot as plt, colors
 
 from rubiks.lib.consts import *
-from rubiks.utils import rotate_state, rotate_state_rev, vis_state, rotate_state_about_left, rotate_state_about_right
+from rubiks.lib.utils.cube_utils import rotate_state, rotate_state_rev, vis_state, rotate_state_about_left, rotate_state_about_right
 
 
 class RubiksCubeEnv(gym.Env):

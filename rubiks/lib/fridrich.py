@@ -2,7 +2,7 @@ import gym
 import gym.spaces
 import random
 from rubiks.lib.consts import *
-from rubiks.utils import get_color, get_matching_idx, move
+from rubiks.lib.utils.cube_utils import get_color, get_matching_idx, move
 import numpy as np
 
 class FridrichSolver:
@@ -11,6 +11,7 @@ class FridrichSolver:
         self.state = None
         self.r = 0
         self.done = False
+        raise DeprecationWarning("Don't use this..doesn't work. Used the yoinked version")
 
     actionDict = {
             'f':  0, # orange
@@ -154,9 +155,6 @@ class FridrichSolver:
         self.env.rotate_cube()
         self.white_cross_s1(ORANGE)
         self.env.rotate_cube()
-
-
-    def solve_corners(self):
 
 
 
