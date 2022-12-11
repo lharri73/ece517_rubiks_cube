@@ -2,7 +2,7 @@ from rubiks.lib.utils.args import parse_args
 from rubiks.lib.utils.model_utils import gen_model
 from rubiks.lib.cubeset import CubeDataset
 from torch.utils.data import DataLoader
-import pytorch_lightning as pl
+import lightning as pl
 
 
 def gen_dataset(args):
@@ -20,7 +20,7 @@ def main():
         auto_scale_batch_size=True,
         enable_checkpointing=True,
         default_root_dir="rubiks/logs",
-        devices=args.gpu_device,
+        devices=args.gpu_devices,
         max_epochs=args.stop_epoch
     )
     dataset = gen_dataset(args)

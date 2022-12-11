@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import pytorch_lightning as pl
+import lightning as pl
 
 
 class ResnetModel(pl.LightningModule):

@@ -13,8 +13,9 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--num_workers', type=int, default=get_cpu_count())
     parser.add_argument('--gpu', action='store_true', default=False)
-    parser.add_argument('--gpus_devices', type=str, default="0")
+    parser.add_argument('--gpu_devices', type=str, default="0")
     parser.add_argument('--lr', type=float, default=0.001)
+    parser.add_argument('--stop_epoch', type=int, default=1000)
 
     args = parser.parse_args()
 
