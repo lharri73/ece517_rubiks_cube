@@ -22,13 +22,12 @@ if not path.isfile(path.join(FOLDER, fname)):
                 a.corner_multiply(cb.basicMoveCube[j])
                 twist_move[N_MOVE * i + 3 * j + k] = a.get_twist()
             a.corner_multiply(cb.basicMoveCube[j])  # 4. move restores face
-    fh = open(path.join(FOLDER, fname), "wb")
-    twist_move.tofile(fh)
+    with open(path.join(FOLDER, fname), "wb") as fh:
+        twist_move.tofile(fh)
 else:
-    fh = open(path.join(FOLDER, fname), "rb")
-    twist_move = ar.array('H')
-    twist_move.fromfile(fh, N_TWIST * N_MOVE)
-fh.close()
+    with open(path.join(FOLDER, fname), "rb") as fh:
+        twist_move = ar.array('H')
+        twist_move.fromfile(fh, N_TWIST * N_MOVE)
 ########################################################################################################################
 
 # ####################################  Move table for the flip of the edges. ##########################################
@@ -46,13 +45,12 @@ if not path.isfile(path.join(FOLDER, fname)):
                 a.edge_multiply(cb.basicMoveCube[j])
                 flip_move[N_MOVE * i + 3 * j + k] = a.get_flip()
             a.edge_multiply(cb.basicMoveCube[j])
-    fh = open(path.join(FOLDER, fname), "wb")
-    flip_move.tofile(fh)
+    with open(path.join(FOLDER, fname), "wb") as fh:
+        flip_move.tofile(fh)
 else:
-    fh = open(path.join(FOLDER, fname), "rb")
-    flip_move = ar.array('H')
-    flip_move.fromfile(fh, N_FLIP * N_MOVE)
-fh.close()
+    with open(path.join(FOLDER, fname), "rb") as fh:
+        flip_move = ar.array('H')
+        flip_move.fromfile(fh, N_FLIP * N_MOVE)
 ########################################################################################################################
 
 # ###################### Move table for the four UD-slice edges FR, FL, Bl and BR. #####################################
@@ -74,14 +72,12 @@ if not path.isfile(path.join(FOLDER, fname)):
                 a.edge_multiply(cb.basicMoveCube[j])
                 slice_sorted_move[N_MOVE * i + 3 * j + k] = a.get_slice_sorted()
             a.edge_multiply(cb.basicMoveCube[j])
-    fh = open(path.join(FOLDER, fname), "wb")
-    slice_sorted_move.tofile(fh)
-    print()
+    with open(path.join(FOLDER, fname), "wb") as fh:
+        slice_sorted_move.tofile(fh)
 else:
-    fh = open(path.join(FOLDER, fname), "rb")
-    slice_sorted_move = ar.array('H')
-    slice_sorted_move.fromfile(fh, N_SLICE_SORTED * N_MOVE)
-fh.close()
+    with open(path.join(FOLDER, fname), "rb") as fh:
+        slice_sorted_move = ar.array('H')
+        slice_sorted_move.fromfile(fh, N_SLICE_SORTED * N_MOVE)
 ########################################################################################################################
 
 # ################# Move table for the u_edges coordinate for transition phase 1 -> phase 2 ############################
@@ -102,14 +98,12 @@ if not path.isfile(path.join(FOLDER, fname)):
                 a.edge_multiply(cb.basicMoveCube[j])
                 u_edges_move[N_MOVE * i + 3 * j + k] = a.get_u_edges()
             a.edge_multiply(cb.basicMoveCube[j])
-    fh = open(path.join(FOLDER, fname), "wb")
-    u_edges_move.tofile(fh)
-    print()
+    with open(path.join(FOLDER, fname), "wb") as fh:
+        u_edges_move.tofile(fh)
 else:
-    fh = open(path.join(FOLDER, fname), "rb")
-    u_edges_move = ar.array('H')
-    u_edges_move.fromfile(fh, N_SLICE_SORTED * N_MOVE)
-fh.close()
+    with open(path.join(FOLDER, fname), "rb") as fh:
+        u_edges_move = ar.array('H')
+        u_edges_move.fromfile(fh, N_SLICE_SORTED * N_MOVE)
 ########################################################################################################################
 
 # ################# Move table for the d_edges coordinate for transition phase 1 -> phase 2 ############################
@@ -130,14 +124,12 @@ if not path.isfile(path.join(FOLDER, fname)):
                 a.edge_multiply(cb.basicMoveCube[j])
                 d_edges_move[N_MOVE * i + 3 * j + k] = a.get_d_edges()
             a.edge_multiply(cb.basicMoveCube[j])
-    fh = open(path.join(FOLDER, fname), "wb")
-    d_edges_move.tofile(fh)
-    print()
+    with open(path.join(FOLDER, fname), "wb") as fh:
+        d_edges_move.tofile(fh)
 else:
-    fh = open(path.join(FOLDER, fname), "rb")
-    d_edges_move = ar.array('H')
-    d_edges_move.fromfile(fh, N_SLICE_SORTED * N_MOVE)
-fh.close()
+    with open(path.join(FOLDER, fname), "rb") as fh:
+        d_edges_move = ar.array('H')
+        d_edges_move.fromfile(fh, N_SLICE_SORTED * N_MOVE)
 ########################################################################################################################
 
 # ######################### # Move table for the edges in the U-face and D-face. #######################################
@@ -162,14 +154,12 @@ if not path.isfile(path.join(FOLDER, fname)):
                     continue
                 ud_edges_move[N_MOVE * i + 3 * j + k] = a.get_ud_edges()
             a.edge_multiply(cb.basicMoveCube[j])
-    fh = open(path.join(FOLDER, fname), "wb")
-    ud_edges_move.tofile(fh)
-    print()
+    with open(path.join(FOLDER, fname), "wb") as fh:
+        ud_edges_move.tofile(fh)
 else:
-    fh = open(path.join(FOLDER, fname), "rb")
-    ud_edges_move = ar.array('H')
-    ud_edges_move.fromfile(fh, N_UD_EDGES * N_MOVE)
-fh.close()
+    with open(path.join(FOLDER, fname), "rb") as fh:
+        ud_edges_move = ar.array('H')
+        ud_edges_move.fromfile(fh, N_UD_EDGES * N_MOVE)
 ########################################################################################################################
 
 # ############################ Move table for the corners coordinate in phase 2 ########################################
@@ -191,13 +181,10 @@ if not path.isfile(path.join(FOLDER, fname)):
                 a.corner_multiply(cb.basicMoveCube[j])
                 corners_move[N_MOVE * i + 3 * j + k] = a.get_corners()
             a.corner_multiply(cb.basicMoveCube[j])
-    fh = open(path.join(FOLDER, fname), "wb")
-    corners_move.tofile(fh)
-    fh.close()
-    print()
+    with open(path.join(FOLDER, fname), "wb") as fh:
+        corners_move.tofile(fh)
 else:
-    fh = open(path.join(FOLDER, fname), "rb")
-    corners_move = ar.array('H')
-    corners_move.fromfile(fh, N_CORNERS * N_MOVE)
-fh.close()
+    with open(path.join(FOLDER, fname), "rb") as fh:
+        corners_move = ar.array('H')
+        corners_move.fromfile(fh, N_CORNERS * N_MOVE)
 ########################################################################################################################

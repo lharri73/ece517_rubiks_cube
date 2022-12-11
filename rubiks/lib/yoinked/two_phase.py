@@ -61,7 +61,7 @@ class TwoPhaseSolver(Solver):
         self.state = cube_str
 
     def solve(self):
-        moves = sv.solve(self.state)
+        moves = sv.solve(self.state, 20, 3)
         self.moves = moves.split(' ')
         self.solved = True
 

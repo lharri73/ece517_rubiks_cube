@@ -118,14 +118,13 @@ if not path.isfile(os.path.join(FOLDER, fname)):
             ss.corner_multiply(cc)  # s*t
             ss.corner_multiply(symCube[inv_idx[s]])  # s*t*s^-1
             twist_conj[N_SYM_D4h * t + s] = ss.get_twist()
-    fh = open(os.path.join(FOLDER, fname), "wb")
-    twist_conj.tofile(fh)
+    with open(os.path.join(FOLDER, fname), "wb") as fh:
+        twist_conj.tofile(fh)
 else:
-    fh = open(path.join(FOLDER, fname), 'rb')
-    twist_conj = ar.array('H')
-    twist_conj.fromfile(fh, N_TWIST * N_SYM_D4h)
+    with open(path.join(FOLDER, fname), 'rb') as fh:
+        twist_conj = ar.array('H')
+        twist_conj.fromfile(fh, N_TWIST * N_SYM_D4h)
 
-fh.close()
 # ######################################################################################################################
 
 # #################### Generate the phase 2 table for the conjugation of the URtoDB coordinate by a symmetrie ##########
@@ -146,13 +145,12 @@ if not path.isfile(path.join(FOLDER, fname)):
             ss.edge_multiply(symCube[inv_idx[s]])  # s*t*s^-1
             ud_edges_conj[N_SYM_D4h * t + s] = ss.get_ud_edges()
     print('')
-    fh = open(path.join(FOLDER, fname), "wb")
-    ud_edges_conj.tofile(fh)
+    with open(path.join(FOLDER, fname), "wb") as fh:
+        ud_edges_conj.tofile(fh)
 else:
-    fh = open(path.join(FOLDER, fname), "rb")
-    ud_edges_conj = ar.array('H')
-    ud_edges_conj.fromfile(fh, N_UD_EDGES * N_SYM_D4h)
-fh.close()
+    with open(path.join(FOLDER, fname), "rb") as fh:
+        ud_edges_conj = ar.array('H')
+        ud_edges_conj.fromfile(fh, N_UD_EDGES * N_SYM_D4h)
 # ######################################################################################################################
 
 # ############## Generate the tables to handle the symmetry reduced flip-slice coordinate in  phase 1 ##################
@@ -195,29 +193,23 @@ if not (path.isfile(path.join(FOLDER, fname1)) and path.isfile(path.join(FOLDER,
                     flipslice_sym[idx_new] = s
             classidx += 1
     print('')
-    fh = open(path.join(FOLDER, fname1), 'wb')
-    flipslice_classidx.tofile(fh)
-    fh.close()
-    fh = open(path.join(FOLDER, fname2), 'wb')
-    flipslice_sym.tofile(fh)
-    fh.close()
-    fh = open(path.join(FOLDER, fname3), 'wb')
-    flipslice_rep.tofile(fh)
-    fh.close()
+    with open(path.join(FOLDER, fname1), 'wb') as fh:
+        flipslice_classidx.tofile(fh)
+    with open(path.join(FOLDER, fname2), 'wb') as fh:
+        flipslice_sym.tofile(fh)
+    with open(path.join(FOLDER, fname3), 'wb') as fh:
+        flipslice_rep.tofile(fh)
 
 else:
-    fh = open(path.join(FOLDER, fname1), 'rb')
-    flipslice_classidx = ar.array('H')
-    flipslice_classidx.fromfile(fh, N_FLIP * N_SLICE)
-    fh.close()
-    fh = open(path.join(FOLDER, fname2), 'rb')
-    flipslice_sym = ar.array('B')
-    flipslice_sym.fromfile(fh, N_FLIP * N_SLICE)
-    fh.close()
-    fh = open(path.join(FOLDER, fname3), 'rb')
-    flipslice_rep = ar.array(uint32)
-    flipslice_rep.fromfile(fh, N_FLIPSLICE_CLASS)
-    fh.close()
+    with open(path.join(FOLDER, fname1), 'rb') as fh:
+        flipslice_classidx = ar.array('H')
+        flipslice_classidx.fromfile(fh, N_FLIP * N_SLICE)
+    with open(path.join(FOLDER, fname2), 'rb') as fh:
+        flipslice_sym = ar.array('B')
+        flipslice_sym.fromfile(fh, N_FLIP * N_SLICE)
+    with open(path.join(FOLDER, fname3), 'rb') as fh:
+        flipslice_rep = ar.array(uint32)
+        flipslice_rep.fromfile(fh, N_FLIPSLICE_CLASS)
 ########################################################################################################################
 
 # ############ Generate the tables to handle the symmetry reduced corner permutation coordinate in phase 2 #############
@@ -255,26 +247,20 @@ if not (path.isfile(path.join(FOLDER, fname1)) and path.isfile(path.join(FOLDER,
                 corner_sym[cp_new] = s
         classidx += 1
     print('')
-    fh = open(path.join(FOLDER, fname1), 'wb')
-    corner_classidx.tofile(fh)
-    fh.close()
-    fh = open(path.join(FOLDER, fname2), 'wb')
-    corner_sym.tofile(fh)
-    fh.close()
-    fh = open(path.join(FOLDER, fname3), 'wb')
-    corner_rep.tofile(fh)
-    fh.close()
+    with open(path.join(FOLDER, fname1), 'wb') as fh:
+        corner_classidx.tofile(fh)
+    with open(path.join(FOLDER, fname2), 'wb') as fh:
+        corner_sym.tofile(fh)
+    with open(path.join(FOLDER, fname3), 'wb') as fh:
+        corner_rep.tofile(fh)
 
 else:
-    fh = open(path.join(FOLDER, fname1), 'rb')
-    corner_classidx = ar.array('H')
-    corner_classidx.fromfile(fh, N_CORNERS)
-    fh.close()
-    fh = open(path.join(FOLDER, fname2), 'rb')
-    corner_sym = ar.array('B')
-    corner_sym.fromfile(fh, N_CORNERS)
-    fh.close()
-    fh = open(path.join(FOLDER, fname3), 'rb')
-    corner_rep = ar.array('H')
-    corner_rep.fromfile(fh, N_CORNERS_CLASS)
-    fh.close()
+    with open(path.join(FOLDER, fname1), 'rb') as fh:
+        corner_classidx = ar.array('H')
+        corner_classidx.fromfile(fh, N_CORNERS)
+    with open(path.join(FOLDER, fname2), 'rb') as fh:
+        corner_sym = ar.array('B')
+        corner_sym.fromfile(fh, N_CORNERS)
+    with open(path.join(FOLDER, fname3), 'rb') as fh:
+        corner_rep = ar.array('H')
+        corner_rep.fromfile(fh, N_CORNERS_CLASS)

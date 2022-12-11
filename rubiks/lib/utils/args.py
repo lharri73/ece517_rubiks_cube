@@ -16,6 +16,8 @@ def parse_args():
     parser.add_argument('--gpu_devices', type=str, default="0")
     parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--stop_epoch', type=int, default=1000)
+    parser.add_argument('--train_size', type=int, default=1000)
+    parser.add_argument('--val_size', type=int, default=256)
 
     args = parser.parse_args()
 

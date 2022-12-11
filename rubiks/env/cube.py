@@ -48,9 +48,10 @@ class RubiksCubeEnv(gym.Env):
         :return: state, {}
         """
         if options is None:
-            options = {'min': 5, 'max': 20, 'scramble': True, "fromList": None, 'print_scramble': False, 'fromState': None}
+            options = {'min': 5, 'max': 20, 'scramble': True, "fromList": None, 'print_scramble': False, 'fromState': None, 'applySeed': True}
 
-        random.seed(seed)
+        if options.get('applySeed', True):
+            random.seed(seed)
 
         for i in range(6):
             self.state[:, :, i] = i

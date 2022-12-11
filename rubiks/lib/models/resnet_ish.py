@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import lightning as pl
+import time
 
 
 class ResnetModel(pl.LightningModule):
@@ -23,26 +24,20 @@ class ResnetModel(pl.LightningModule):
         # first two hidden layers
         self.fc1 = nn.Linear(self.state_dim * self.one_hot_depth, h1_dim)
 
-        if self.batch_norm:
-            self.bn1 = nn.BatchNorm1d(h1_dim)
+        self.bn1 = nn.BatchNorm1d(h1_dim)
 
         self.fc2 = nn.Linear(h1_dim, resnet_dim)
 
-        if self.batch_norm:
-            self.bn2 = nn.BatchNorm1d(resnet_dim)
+        self.bn2 = nn.BatchNorm1d(resnet_dim)
 
         # resnet blocks
         for block_num in range(self.num_resnet_blocks):
-            if self.batch_norm:
-                res_fc1 = nn.Linear(resnet_dim, resnet_dim)
-                res_bn1 = nn.BatchNorm1d(resnet_dim)
-                res_fc2 = nn.Linear(resnet_dim, resnet_dim)
-                res_bn2 = nn.BatchNorm1d(resnet_dim)
-                self.blocks.append(nn.ModuleList([res_fc1, res_bn1, res_fc2, res_bn2]))
-            else:
-                res_fc1 = nn.Linear(resnet_dim, resnet_dim)
-                res_fc2 = nn.Linear(resnet_dim, resnet_dim)
-                self.blocks.append(nn.ModuleList([res_fc1, res_fc2]))
+            res_fc1 = nn.Linear(resnet_dim, resnet_dim)
+            res_bn1 = nn.BatchNorm1d(resnet_dim)
+            res_fc2 = nn.Linear(resnet_dim, resnet_dim)
+            res_bn2 = nn.BatchNorm1d(resnet_dim)
+            self.blocks.append(nn.ModuleList([res_fc1, res_bn1, res_fc2, res_bn2]))
+
 
         # output
         self.fc_out = nn.Linear(resnet_dim, out_dim)
@@ -69,29 +64,23 @@ class ResnetModel(pl.LightningModule):
 
         # first two hidden layers
         x = self.fc1(x)
-        if self.batch_norm:
-            x = self.bn1(x)
+
+        x = self.bn1(x)
 
         x = F.relu(x)
         x = self.fc2(x)
-        if self.batch_norm:
-            x = self.bn2(x)
+        x = self.bn2(x)
 
         x = F.relu(x)
 
         # resnet blocks
         for block_num in range(self.num_resnet_blocks):
             res_inp = x
-            if self.batch_norm:
-                x = self.blocks[block_num][0](x)
-                x = self.blocks[block_num][1](x)
-                x = F.relu(x)
-                x = self.blocks[block_num][2](x)
-                x = self.blocks[block_num][3](x)
-            else:
-                x = self.blocks[block_num][0](x)
-                x = F.relu(x)
-                x = self.blocks[block_num][1](x)
+            x = self.blocks[block_num][0](x)
+            x = self.blocks[block_num][1](x)
+            x = F.relu(x)
+            x = self.blocks[block_num][2](x)
+            x = self.blocks[block_num][3](x)
 
             x = F.relu(x + res_inp)
 
@@ -105,13 +94,18 @@ class ResnetModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+        y = y.reshape((-1, 1))
+        tic=time.perf_counter()
         y_hat = self(x)
+        toc = time.perf_counter()
         loss = F.mse_loss(y_hat, y)
         self.log('train_loss', loss)
+        self.log('eval_time', toc-tic)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
+        y = y.reshape((-1,1))
         y_hat = self(x)
         loss = F.mse_loss(y_hat, y)
         self.log('val_loss', loss)

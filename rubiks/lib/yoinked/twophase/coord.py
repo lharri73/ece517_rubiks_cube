@@ -206,14 +206,12 @@ def create_phase2_edgemerge_table():
                         if cnt % 2000 == 0:
                             print('.', end='', flush=True)
         print()
-        fh = open(path.join(FOLDER, fname), "wb")
-        u_edges_plus_d_edges_to_ud_edges.tofile(fh)
-        fh.close()
-        print()
+        with open(path.join(FOLDER, fname), "wb") as fh:
+            u_edges_plus_d_edges_to_ud_edges.tofile(fh)
     else:
-        fh = open(path.join(FOLDER, fname), "rb")
-        u_edges_plus_d_edges_to_ud_edges = ar.array('H')
-        u_edges_plus_d_edges_to_ud_edges.fromfile(fh, N_U_EDGES_PHASE2 * N_PERM_4)
+        with open(path.join(FOLDER, fname), "rb") as fh:
+            u_edges_plus_d_edges_to_ud_edges = ar.array('H')
+            u_edges_plus_d_edges_to_ud_edges.fromfile(fh, N_U_EDGES_PHASE2 * N_PERM_4)
 
 
 ########################################################################################################################

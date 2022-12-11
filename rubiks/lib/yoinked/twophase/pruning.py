@@ -162,13 +162,12 @@ def create_phase1_prun_table():
             print()
             print('depth:', depth, 'done: ' + str(done) + '/' + str(total))
 
-        fh = open(path.join(defs.FOLDER, fname), "wb")
-        flipslice_twist_depth3.tofile(fh)
+        with open(path.join(defs.FOLDER, fname), "wb") as fh:
+            flipslice_twist_depth3.tofile(fh)
     else:
-        fh = open(path.join(defs.FOLDER, fname), "rb")
-        flipslice_twist_depth3 = ar.array(uint32)
-        flipslice_twist_depth3.fromfile(fh, total // 16 + 1)
-    fh.close()
+        with open(path.join(defs.FOLDER, fname), "rb") as fh:   
+            flipslice_twist_depth3 = ar.array(uint32)
+            flipslice_twist_depth3.fromfile(fh, total // 16 + 1)
 
 
 def create_phase2_prun_table():
@@ -263,14 +262,13 @@ def create_phase2_prun_table():
             print('depth:', depth, 'done: ' + str(done) + '/' + str(total))
 
         print('remaining unfilled entries have depth >=11')
-        fh = open(path.join(defs.FOLDER, fname), "wb")
-        corners_ud_edges_depth3.tofile(fh)
+        with open(path.join(defs.FOLDER, fname), "wb") as fh:
+            corners_ud_edges_depth3.tofile(fh)
     else:
-        fh = open(path.join(defs.FOLDER, fname), "rb")
-        corners_ud_edges_depth3 = ar.array(uint32)
-        corners_ud_edges_depth3.fromfile(fh, total // 16)
+        with open(path.join(defs.FOLDER, fname), "rb") as fh:
+            corners_ud_edges_depth3 = ar.array(uint32)
+            corners_ud_edges_depth3.fromfile(fh, total // 16)
 
-    fh.close()
 
 
 def create_phase2_cornsliceprun_table():
@@ -303,13 +301,12 @@ def create_phase2_cornsliceprun_table():
 
             depth += 1
         print()
-        fh = open(path.join(defs.FOLDER, fname), "wb")
-        cornslice_depth.tofile(fh)
+        with open(path.join(defs.FOLDER, fname), "wb") as fh: 
+            cornslice_depth.tofile(fh)
     else:
-        fh = open(path.join(defs.FOLDER, fname), "rb")
-        cornslice_depth = ar.array('b')
-        cornslice_depth.fromfile(fh, defs.N_CORNERS * defs.N_PERM_4)
-    fh.close()
+        with open(path.join(defs.FOLDER, fname), "rb") as fh:
+            cornslice_depth = ar.array('b')
+            cornslice_depth.fromfile(fh, defs.N_CORNERS * defs.N_PERM_4)
 
 # array distance computes the new distance from the old_distance i and the new_distance_mod3 j. ########################
 # We need this array because the pruning tables only store the distances mod 3. ########################################

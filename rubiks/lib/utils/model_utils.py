@@ -1,7 +1,31 @@
 from rubiks.lib.models.resnet_ish import ResnetModel
 from rubiks.lib.consts import actionDict
+import errno
+import os
+import signal
+import functools
+
+assert os.name == 'posix', \
+    "timeout will not work on non-unix machines (looking at you, Windows...). Can't raise a timer signal."
 
 
 def gen_model(cfg):
     model = ResnetModel(3*3*6, 1, cfg)
     return model
+
+class TimeoutError(Exception):
+    pass
+
+
+class timeout:
+    def __init__(self, seconds=1, error_message='Timeout'):
+        self.seconds = seconds
+        self.error_message = error_message
+    def handle_timeout(self, signum, frame):
+        raise TimeoutError(self.error_message)
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.handle_timeout)
+        signal.alarm(self.seconds)
+    def __exit__(self, type, value, traceback):
+        signal.alarm(0)
+
