@@ -24,12 +24,13 @@ def main():
     model = gen_model(args)
     trainer = pl.Trainer(
         accelerator="gpu" if args.gpu else "cpu",
-        auto_scale_batch_size=True,
+        auto_scale_batch_size='binsearch',
         enable_checkpointing=True,
         default_root_dir="rubiks/logs",
         devices=args.gpu_devices,
         max_epochs=args.stop_epoch,
-        log_every_n_steps=5
+        log_every_n_steps=5,
+        resume_from_checkpoint="/home/lharri73/code/ece517_rubiks_cube/rubiks/rubiks/logs/lightning_logs/version_3/checkpoints/epoch=1048-step=33568.ckpt"
     )
     train, val = gen_dataset(args)
     trainer.fit(model, train, val)
