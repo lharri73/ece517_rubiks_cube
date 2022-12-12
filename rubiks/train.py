@@ -3,6 +3,7 @@ from rubiks.lib.utils.model_utils import gen_model
 from rubiks.lib.cubeset import CubeDataset
 from torch.utils.data import DataLoader
 import lightning as pl
+from lightning.pytorch.callbacks import LearningRateMonitor
 
 
 def gen_dataset(args):
@@ -22,6 +23,7 @@ def gen_dataset(args):
 def main():
     args = parse_args()
     model = gen_model(args)
+    lr_monitor = LearningRateMonitor(logging_interval='step')
     trainer = pl.Trainer(
         accelerator="gpu" if args.gpu else "cpu",
         auto_scale_batch_size='binsearch',
@@ -30,7 +32,9 @@ def main():
         devices=args.gpu_devices,
         max_epochs=args.stop_epoch,
         log_every_n_steps=5,
-        resume_from_checkpoint="/home/lharri73/code/ece517_rubiks_cube/rubiks/rubiks/logs/lightning_logs/version_3/checkpoints/epoch=1048-step=33568.ckpt"
+        resume_from_checkpoint=args.resume,
+        auto_lr_find=True,
+        callbacks=[lr_monitor]
     )
     train, val = gen_dataset(args)
     trainer.fit(model, train, val)

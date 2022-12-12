@@ -90,7 +90,12 @@ class ResnetModel(pl.LightningModule):
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.cfg.lr)
-        return optimizer
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+        return {
+                "optimizer": optimizer,
+                "lr_scheduler": scheduler,
+                "monitor": "train_loss"
+                }
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -101,6 +106,7 @@ class ResnetModel(pl.LightningModule):
         loss = F.mse_loss(y_hat, y)
         self.log('train_loss', loss)
         self.log('eval_time', toc-tic)
+        self.log('lr', self.cfg.lr)
         return loss
 
     def validation_step(self, batch, batch_idx):

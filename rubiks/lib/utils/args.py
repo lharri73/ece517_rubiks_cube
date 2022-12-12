@@ -18,6 +18,7 @@ def parse_args():
     parser.add_argument('--stop_epoch', type=int, default=1000)
     parser.add_argument('--train_size', type=int, default=1000)
     parser.add_argument('--val_size', type=int, default=256)
+    parser.add_argument('--resume', default=None)
 
     args = parser.parse_args()
 
