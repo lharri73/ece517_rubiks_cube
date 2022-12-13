@@ -34,3 +34,20 @@ actionDict = {
             '.d': 10,
             '.b': 11
         }
+
+actionDictInv = {val:key for key,val in actionDict.items()}
+
+actionList = [
+        'f',
+        'r',
+        'l',
+        'u',
+        'd',
+        'b',
+        '.f',
+        '.r',
+        '.l',
+        '.u',
+        '.d',
+        '.b'
+]

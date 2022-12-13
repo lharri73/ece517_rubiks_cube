@@ -74,12 +74,14 @@ class RubiksCubeEnv(gym.Env):
         return self.state, {}
 
     def _scramble(self, steps, print_scramble=False):
-
+        scramble = ""
         for _ in range(steps):
             action = random.randint(0, 11)
             if print_scramble:
-                print(self.actionList[action])
+                scramble += self.actionList[action]
             self._action(action)
+        if print_scramble:
+            print(f"scramble: {scramble}")
 
     def _action(self, action):
         #self.actions_taken.append(action)
@@ -164,16 +166,20 @@ class RubiksCubeEnv(gym.Env):
         self.rotate_cc(side)
         self.rotate_cc(side)
 
-    def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
-        self._action(action)
-        self.step_count += 1
-        reward = -1
-
+    def solved(self):
         done = True
         for i in range(6):
             if not np.all(self.state[:, :, i] == i):
                 done = False
                 break
+        return done
+
+    def step(self, action: ActType) -> Tuple[ObsType, float, bool, bool, dict]:
+        self._action(action)
+        self.step_count += 1
+        reward = -1
+
+        done = self.solved()
 
         if done:
             reward = 100
@@ -228,8 +234,9 @@ class RubiksCubeEnv(gym.Env):
             else:
                 self._action(action)
 
-    def _initialize_from_state(self, state):
-        assert len(state) == 3*3*6, f"state must be 54 (3x3x6) long. Got {len(state)}"
+    def _initialize_from_state(self, statestr):
+        assert len(statestr) == 3*3*6, f"state must be 54 (3x3x6) long. Got {len(statestr)}"
+        state = [int(x) for x in statestr]
         j=0
         for side in [WHITE, GREEN, ORANGE, YELLOW, BLUE, RED]:
             for i in range(9):
@@ -244,3 +251,58 @@ class RubiksCubeEnv(gym.Env):
             for i in range(9):
                 ret += str(int(self.state[i // 3, i % 3, side]))
         return ret
+
+    @contextmanager
+    def inverse_protect(self, action):
+        if action == 'u':
+            self.step(self.actionDict['u'])
+            yield
+            self.step(self.actionDict['.u'])
+        elif action == 'd':
+            self.step(self.actionDict['d'])
+            yield
+            self.step(self.actionDict['.d'])
+        elif action == 'l':
+            self.step(self.actionDict['l'])
+            yield
+            self.step(self.actionDict['.l'])
+        elif action == 'r':
+            self.step(self.actionDict['r'])
+            yield
+            self.step(self.actionDict['.r'])
+        elif action == 'f':
+            self.step(self.actionDict['f'])
+            yield
+            self.step(self.actionDict['.f'])
+        elif action == 'b':
+            self.step(self.actionDict['b'])
+            yield
+            self.step(self.actionDict['.b'])
+        elif action =='.u':
+            self.step(self.actionDict['.u'])
+            yield
+            self.step(self.actionDict['u'])
+        elif action == '.d':
+            self.step(self.actionDict['.d'])
+            yield
+            self.step(self.actionDict['d'])
+        elif action == '.l':
+            self.step(self.actionDict['.l'])
+            yield
+            self.step(self.actionDict['l'])
+        elif action == '.r':
+            self.step(self.actionDict['.r'])
+            yield
+            self.step(self.actionDict['r'])
+        elif action  == '.f':
+            self.step(self.actionDict['.f'])
+            yield
+            self.step(self.actionDict['f'])
+        elif action == '.b':
+            self.step(self.actionDict['.b'])
+            yield
+            self.step(self.actionDict['b'])
+        else:
+            raise ValueError(f"Invalid action {action}")
+
+        self.step_count -= 2

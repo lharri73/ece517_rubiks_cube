@@ -19,6 +19,7 @@ def parse_args():
     parser.add_argument('--train_size', type=int, default=1000)
     parser.add_argument('--val_size', type=int, default=256)
     parser.add_argument('--resume', default=None)
+    parser.add_argument('--checkpoint', type=str, default=None)
 
     args = parser.parse_args()
 
@@ -26,5 +27,8 @@ def parse_args():
         raise ValueError("changed gpu_device, but gpu training not enabled...did you want to train with GPUs?")
 
     args.gpu_devices = [int(x) for x in args.gpu_devices.split(",")]
+
+    if args.resume is not None and args.checkpoint is not None:
+        raise ValueError("Cannot resume and checkpoint at the same time")
 
     return args

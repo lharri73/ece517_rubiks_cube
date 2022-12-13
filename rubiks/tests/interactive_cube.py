@@ -44,6 +44,8 @@ def main():
                 print("usage: init <string_state>")
             else:
                 env.reset(options={"fromState": options[1]})
+        elif input_ == "ss":
+            print(env.get_string_state())
         elif input_.startswith("help"):
             print("reset:               destroy the old environment and create a new one")
             print("exit:                quit interactive_cobe")

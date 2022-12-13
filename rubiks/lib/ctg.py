@@ -1,6 +1,6 @@
 from rubiks.lib.yoinked.two_phase import TwoPhaseSolver
 from rubiks.lib.yoinked.fridrich import Fridrich
-from rubiks.lib.utils.model_utils import timeout
+from rubiks.lib.utils.timeout import timeout
 
 
 def calc_cost_to_go(env):
