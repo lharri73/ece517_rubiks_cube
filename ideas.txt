@@ -1,5 +1,0 @@
-# Ideas
-
-- Reward for solving each step
-- Curriculum Exploration
--

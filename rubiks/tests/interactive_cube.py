@@ -46,6 +46,14 @@ def main():
                 env.reset(options={"fromState": options[1]})
         elif input_ == "ss":
             print(env.get_string_state())
+        elif input_.startswith("save"):
+            options = input_.split()
+            if len(options) != 2:
+                print("usage: save <filename>")
+            else:
+                env.render(show=False)
+                plt.axis('off')
+                plt.savefig(options[1])
         elif input_.startswith("help"):
             print("reset:               destroy the old environment and create a new one")
             print("exit:                quit interactive_cobe")
