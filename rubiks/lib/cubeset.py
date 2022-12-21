@@ -1,7 +1,6 @@
 import torch
 from torch.utils.data import IterableDataset
 import gym
-from torch.utils.data.dataset import T_co
 
 # noinspection PyUnresolvedReferences
 from rubiks.env.cube import RubiksCubeEnv
@@ -9,6 +8,7 @@ from rubiks.lib.ctg import calc_cost_to_go
 import warnings
 import os
 import random
+import pytorch_lightning as pl
 
 
 class CubeDataset(IterableDataset):
